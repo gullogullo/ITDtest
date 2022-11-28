@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+  <div id="demo">BALD</div>
+  <!--
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      style="display:none;" 
+    {% endwith %}
+    <h2 id="instruction"></h2>
+    <div id="output"></div>
+    --> 
+  <div id="output"></div>  
+  <div class="playBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" id="playDown" width="119.91" height="119.91">
+      <path fill="#E74C3C" d="M58.8 10.8c-27.77 0-50.3 22.5-50.3 50.3 0 27.78 22.53 50.3 50.3 50.3 27.8 0 50.32-22.52 50.32-50.3 0-27.8-22.53-50.3-50.3-50.3zm0 97.97c-26.32 0-47.66-21.34-47.66-47.67 0-26.34 21.34-47.68 47.67-47.68 26.37 0 47.7 21.34 47.7 47.67 0 26.3-21.33 47.64-47.66 47.64z" />
+      <path fill="#E74C3C" d="M58.8 21.12c-22.07 0-39.97 17.9-39.97 39.98s17.9 39.98 39.98 39.98c22.1 0 40-17.9 40-39.98s-17.9-39.98-40-39.98zm3.52 50.7L43.77 82.47l.04-21.37.07-21.37 18.5 10.72 18.5 10.72L62.3 71.82z" />
+    </svg>
+  </div>
+  <div class="closeBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" id="closeB" width="119.91" height="119.91">
+      <line x1="15" y1="15" x2="25" y2="25" stroke="#E74C3C" stroke-width="2.5" stroke-linecap="round" stroke-miterlimit="10"></line>
+      <line x1="25" y1="15" x2="15" y2="25" stroke="#E74C3C" stroke-width="2.5" stroke-linecap="round" stroke-miterlimit="10"></line>    
+      <circle class="circle" cx="20" cy="20" r="19" opacity="0" stroke="#E74C3C" stroke-width="2.5" stroke-linecap="round" stroke-miterlimit="10" fill="none"></circle>
+      <path stroke="#E74C3C" d="M20 1c10.45 0 19 8.55 19 19s-8.55 19-19 19-19-8.55-19-19 8.55-19 19-19z" class="progress" stroke="#E74C3C" stroke-width="2.5" stroke-linecap="round" stroke-miterlimit="10" fill="none"></path>
+    </svg>
+  </div>
+  <div class="btnOne">
+    <svg xmlns="http://www.w3.org/2000/svg" id="btn1" width="119.91" height="119.91" fill="currentColor" class="bi bi-1-circle" viewBox="0 0 16 16">
+      <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8Zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM9.283 4.002V12H7.971V5.338h-.065L6.072 6.656V5.385l1.899-1.383h1.312Z"/>
+    </svg>
+  </div>
+  <div class="btnTwo">
+    <svg xmlns="http://www.w3.org/2000/svg" id="btn2" width="119.91" height="119.91" fill="currentColor" class="bi bi-2-circle" viewBox="0 0 16 16">
+      <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8Zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM6.646 6.24v.07H5.375v-.064c0-1.213.879-2.402 2.637-2.402 1.582 0 2.613.949 2.613 2.215 0 1.002-.6 1.667-1.287 2.43l-.096.107-1.974 2.22v.077h3.498V12H5.422v-.832l2.97-3.293c.434-.475.903-1.008.903-1.705 0-.744-.557-1.236-1.313-1.236-.843 0-1.336.615-1.336 1.306Z"/>
+    </svg>
+  </div>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/playbutton.css') }}">
+  <!--<audio controls id="audioPlayer" src="static/audio/ITD.wav" type="audio/wav">
+  </audio>-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/test_bald.js') }}"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</body>

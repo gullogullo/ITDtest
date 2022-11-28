@@ -1,0 +1,36 @@
+html,
+body {
+  font-family: 'Poiret One', 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  background: #fcfff4;
+  background: -moz-linear-gradient(
+    -45deg,
+    hsl(76, 100%, 98%) 0%,
+    hsl(86, 21%, 87%) 40%,
+    hsl(99, 11%, 71%) 100%
+  );
+  background: -webkit-linear-gradient(
+    -45deg,
+    hsl(76, 100%, 98%) 0%,
+    hsl(86, 21%, 87%) 40%,
+    hsl(99, 11%, 71%) 100%
+  );
+  background: linear-gradient(
+    135deg,
+    hsl(76, 100%, 98%) 0%,
+    hsl(86, 21%, 87%) 40%,
+    hsl(99, 11%, 71%) 100%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfff4', endColorstr='#b3bead',GradientType=1 );
+  height: 100%;
+  overflow: hidden;
+}
+.hithere {
+  animation: hithere 2s ease infinite;
+}
+@keyframes hithere {
+  30% { transform: scale(1.2); }
+  40%, 60% { transform: rotate(-20deg) scale(1.2); }
+  50% { transform: rotate(20deg) scale(1.2); }
+  70% { transform: rotate(0deg) scale(1.2); }
+  100% { transform: scale(1); }
+}

@@ -1,0 +1,125 @@
+from typing import Tuple, Union, Dict, Callable
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import optimize
+from sklearn.base import BaseEstimator, RegressorMixin
+
+from fit_psyche.models.wh2001 import wh2001
+from fit_psyche.models.logit import logit
+
+
+class PsychometricCurve(BaseEstimator, RegressorMixin):
+    model: str
+    coefs_: Union[None, Dict[str, float]]
+
+    mean_lims: Tuple[float, float]
+    var_lims: Tuple[float, float]
+    guess_rate_lims: Tuple[float, float]
+    lapse_rate_lims: Tuple[float, float]
+
+    _fit_func: Callable
+
+    def __init__(self, model: str = 'logit', mean_lims=(0, 50), var_lims=(5, 20),
+                 guess_rate_lims=(0.49, 0.5), lapse_rate_lims=(0.01, 0.05)) -> None:
+        """
+        Fit a Logit or Wichmann and Hill 2001 psychometric curve.
+        Model parameters:
+          - Both:
+            - mean (bias): The mean point of the experimental variable where the decision flips (on average).
+                           Describes decision bias.
+            - var / discrimination threshold: The distribution variance. Lower means the decision flips quicker, so is
+                                              "better". Both models are cumulative normal distributions. Greater
+                                              variance = wider distribution = more change in x before decision flips.
+          - wh only
+            - Guess and lapse rates: Model subject fallibility. Essentially allow either end of the fit cumulative
+                                     distribution to anchor to points other than 0 and 1 at each end of the curve
+                                     (respectively). See Wichmann and Hill, 2001.
+        For all parameters, starting points are set as a mean of the specified limits.
+        :param model: Which model to use, 'logit' or 'wh'. Logit model has two parameters, mean and variance. WH
+                      adds guess and lapse rate. Default 'logit'.
+        :param mean_lims: Limit for the mean parameter. Should be set according to range of independent (x) variable.
+                          For example, if the x variable is set between 10 and 20 units in the experiment, limits within
+                          that range are reasonable. If it's outside something weird is going on!. Specified as
+                          tuple(min, max). Default (0, 20).
+        :param var_lims: Limit for the var parameter. Lower limit should be >0 and upper limit should be set according
+                         to task difficulty. Specified as tuple(min, max). Default (0.001, 100).
+        :param guess_rate_lims: Limit for the guess parameter. Sets anchor point for start of curve and represents
+                                proportion of trails where subject acts randomly. Limits should be set according the
+                                expectations about subject.
+                                For example, it should be higher for humans than a machine learning model... Unless,
+                                it's a machine learning model with stochastic elements like a NN with dropout or
+                                reinforcement learning model that uses Epsilon greedy.
+                                Suggestions:
+                                  - Human (0.01, 0.05) ie. 1-5%
+                                  - Deterministic ML model (0, 1e-6) - the 'logit' model may be more appropriate.
+                                  - Stochastic ML model: Around known epsilon greedy value, or some low value in other
+                                    cases.
+                                Specified as tuple(min, max). Default (0.01, 0.05).
+        :param lapse_rate_lims: Sets the anchor point for the upper end of the curve. See guess_rate_lims.
+        """
+
+        self.coefs_ = None
+        self.model = model
+        self.mean_lims = mean_lims
+        self.var_lims = var_lims
+        self.guess_rate_lims = guess_rate_lims
+        self.lapse_rate_lims = lapse_rate_lims
+        self.set_params(model=model, mean_lims=mean_lims, var_lims=var_lims,
+                        guess_rate_lims=guess_rate_lims, lapse_rate_lims=lapse_rate_lims)
+
+    def set_params(self, *args, **kwargs) -> "PsychometricCurve":
+        super().set_params(*args, **kwargs)
+        if self.model not in ['logit', 'wh']:
+            raise ValueError(f"Unknown model: {self.model}. Available models: 'logit', 'wh'")
+
+        if self.model.lower() == 'wh':
+            self._fit_func = wh2001
+        else:
+            self._fit_func = logit
+        return self
+
+    def fit(self, x: np.array, y: np.array) -> "PsychometricCurve":
+        if self.model.lower() == 'wh':
+            lims = [self.mean_lims, self.var_lims, self.guess_rate_lims, self.lapse_rate_lims]
+            bounds = ([self.mean_lims[0], self.var_lims[0], self.guess_rate_lims[0], self.lapse_rate_lims[0]],
+                      [self.mean_lims[1], self.var_lims[1], self.guess_rate_lims[1], self.lapse_rate_lims[1]])
+        else:
+            lims = [self.mean_lims, self.var_lims]
+            bounds = ([self.mean_lims[0], self.var_lims[0]], [self.mean_lims[1], self.var_lims[1]])
+
+        popt, pcov = optimize.curve_fit(f=self._fit_func, xdata=x, ydata=y,
+                                        p0=[np.mean(lim) for lim in lims], bounds=bounds)
+
+        self.coefs_ = {'mean': popt[0], 'var': popt[1]}
+        if self.model.lower() == 'wh':
+            self.coefs_.update({'guess_rate': popt[2], 'lapse_rate': popt[3]})
+
+        return self
+
+    def predict(self, x: np.array) -> np.ndarray:
+        return self._fit_func(x, **self.coefs_)
+
+    def plot(self, x: np.array, y: np.ndarray, name, surname, seventynine) -> None:
+        fig, ax = plt.subplots()
+
+        ax.plot(x, self.predict(x), label='Variance: {:.2f}'.format(self.coefs_['var']))
+
+        if y is not None:
+            ax.scatter(x, y, label='Data', color='b')
+        ax.legend()
+        ax.set_xlabel('ITD')
+        ax.set_ylabel('Probability')
+        ax.set_title('Wichmann & Hill PF Fitting')
+        ax.set_title('Wichmann & Hill PF Fitting: 79.4% at {:.0f}'.format(seventynine))
+        plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
+        plt.close(fig)
+        # return fig
+
+
+if __name__ == "__main__":
+    x = np.linspace(start=8, stop=16, num=16)
+    y = (x > x.mean()).astype(float)
+
+    pc = PsychometricCurve(model='wh', guess_rate_lims=(0, 0.2)).fit(x, y)
+    pc.plot(x, y)
