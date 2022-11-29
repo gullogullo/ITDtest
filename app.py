@@ -243,16 +243,16 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 def index():
     name = ""
     surname = ""
-    session['firstname'] = name
-    session['surname'] = surname
+    #session['firstname'] = name
+    #session['surname'] = surname
     if request.method == "POST":
         name = str(request.values.get('name'))
         surname = str(request.values.get('lastname'))
-        session['firstname'] = name
-        session['surname'] = surname
+        #session['firstname'] = name
+        #session['surname'] = surname
         # REMOVE
-    print('firstname', session['firstname'])
-    print('surname', surname)
+    #print('firstname', session['firstname'])
+    #print('surname', surname)
     #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
     #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
     #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
