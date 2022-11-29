@@ -1,3 +1,13 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Hello World!"
+
+
+'''
 # IMPORTS
 
 from flask import Flask, request, session, render_template
@@ -599,7 +609,7 @@ def test_2afc():
             'queries': queried, 'labels': labels}
     return render_template('test_2afc.html')
 
-
+'''
 '''
 if __name__== '__main__':
     app.secret_key = 'super secret key'
