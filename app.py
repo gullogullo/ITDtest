@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import torch
 import gpytorch
 from torch.optim import Adam
-
+'''
 from modules.customDataset import CustomDataset as customDataset
 from modules.sound import Stimulus as stimulus
 from modules.acquisition import BALD as BALD
@@ -24,7 +24,7 @@ from modules.util import move_s as move_s
 from modules.util import RMSELoss as RMSELoss
 from modules.twoAFC import TwoAFC as twoafc
 from modules.psychometric_curve import PsychometricCurve
-
+'''
 import secrets
 import time
 import os
