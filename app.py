@@ -1,13 +1,3 @@
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def index():
-    return "Hello World!"
-
-
-'''
 # IMPORTS
 
 from flask import Flask, request, session, render_template
@@ -247,7 +237,7 @@ PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
 PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
-saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+# saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
 
 @app.route('/', methods =["POST", "GET"])
 def index():
@@ -263,12 +253,12 @@ def index():
         # REMOVE
     print('firstname', session['firstname'])
     print('surname', surname)
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
     return render_template("index.html")
 
-
+'''
 @app.route('/test_select')
 def test_select():
     global queried_samples_Bald
