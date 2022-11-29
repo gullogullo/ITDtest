@@ -245,9 +245,9 @@ def index():
     surname = ""
     #session['firstname'] = name
     #session['surname'] = surname
-    if request.method == "POST":
-        name = str(request.values.get('name'))
-        surname = str(request.values.get('lastname'))
+    #if request.method == "POST":
+    #    name = str(request.values.get('name'))
+    #    surname = str(request.values.get('lastname'))
         #session['firstname'] = name
         #session['surname'] = surname
         # REMOVE
