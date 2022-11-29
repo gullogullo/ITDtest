@@ -239,7 +239,7 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
 
-@app.route('/', methods =["POST", "GET"])
+@app.route('/')#, methods =["POST", "GET"])
 def index():
     name = ""
     surname = ""
