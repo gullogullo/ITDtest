@@ -14,8 +14,8 @@ from matplotlib import pyplot as plt
 import torch
 import gpytorch
 from torch.optim import Adam
+from modules import CustomDataset as customDataset
 '''
-from modules.customDataset import CustomDataset as customDataset
 from modules.sound import Stimulus as stimulus
 from modules.acquisition import BALD as BALD
 from modules.acquisition import Random as Random
