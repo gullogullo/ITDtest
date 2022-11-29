@@ -19,7 +19,7 @@ from modules.customDataset import CustomDataset as customDataset
 from modules.sound import Stimulus as stimulus
 from modules.acquisition import BALD as BALD
 from modules.acquisition import Random as Random
-from modules.util import move_sample as move_sample
+# from modules.util import move_sample as move_sample
 from modules.util import move_s as move_s
 from modules.util import RMSELoss as RMSELoss
 from modules.twoAFC import TwoAFC as twoafc
@@ -33,7 +33,7 @@ import errno
 #import io
 #import base64
 import numpy as np
-from copy import deepcopy
+# from copy import deepcopy
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
@@ -127,6 +127,10 @@ def saveInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
     torch.save(pre_acquisition_ll_state_Random, pathllRandom)
 
 def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
+    global model_Bald
+    global likelihood_Bald
+    global model_Random
+    global likelihood_Random
     model_Bald = torch.load(pathBald)
     likelihood_Bald = torch.load(pathllBald)
     model_Random = torch.load(pathRandom)
@@ -237,7 +241,6 @@ saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
 
 @app.route('/', methods =["POST", "GET"])
 def index():
-    fig_dir = 'static/figures'
     name = ""
     surname = ""
     session['firstname'] = name
@@ -368,6 +371,7 @@ def test_bald():
             #pngImageB64String = "data:image/png;base64,"
             #pngImageB64String += base64.b64encode(pngImage.getvalue()).decode('utf8')
             #session['imageBald'] = pngImageB64String
+            print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
@@ -464,6 +468,7 @@ def test_random():
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
             ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Random.inputs[seventy_index].item()))
+            print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
             plt.close(f)
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
@@ -582,6 +587,7 @@ def test_2afc():
             predictions = pc.predict(unique_itds)
             seventynine_percent = min(predictions, key= lambda x: abs(x - 0.794))
             seventy_index = (predictions == seventynine_percent).nonzero()[0].item()
+            print('saving image')
             pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
             # print(pc.score(itds_sorted, labels_sorted))
             # print(pc.coefs_)
