@@ -39,6 +39,7 @@ import numpy as np
 secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
+'''
 torch.set_flush_denormal(True)
 plt.switch_backend('Agg')
 
@@ -238,16 +239,16 @@ PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-
-@app.route('/')#, methods =["POST", "GET"])
+'''
+@app.route('/', methods =["POST", "GET"])
 def index():
     name = ""
     surname = ""
     #session['firstname'] = name
     #session['surname'] = surname
-    #if request.method == "POST":
-    #    name = str(request.values.get('name'))
-    #    surname = str(request.values.get('lastname'))
+    if request.method == "POST":
+        name = str(request.values.get('name'))
+        surname = str(request.values.get('lastname'))
         #session['firstname'] = name
         #session['surname'] = surname
         # REMOVE
