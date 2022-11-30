@@ -9,7 +9,7 @@ from scipy import stats
 import numpy as np
 import torch
 import torchaudio
-import sounddevice as sd
+#import sounddevice as sd
 import random
 
 
@@ -142,8 +142,8 @@ class Stimulus:
         wav = 'static/audio/ITD.wav'
         #os.remove(wav)
         #wavfile.write(wav, self.sample_rate_out, self.audio_out)
-        sd.play(self.audio_out, self.sample_rate_out)
-        sd.wait()
+        #sd.play(self.audio_out, self.sample_rate_out)
+        #sd.wait()
 
         # RETURN THE RIGHTMOST STIMULUS
         return rightmost, wav
@@ -161,4 +161,4 @@ class Stimulus:
             if num_channels > 1:
                 axes[c].set_ylabel(f"Channel {c+1}")
         figure.suptitle(title)
-        plt.show(block=False)
+        #plt.show(block=False)
