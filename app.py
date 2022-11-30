@@ -25,7 +25,7 @@ import numpy as np
 # from copy import deepcopy
 sys.path.insert(0, os.getcwd() + '/modules')  
 from customDataset import CustomDataset as customDataset
-#from sound import Stimulus as stimulus
+from sound import Stimulus as stimulus
 from acquisition import BALD as BALD
 from acquisition import Random as Random
 # from util import move_sample as move_sample
