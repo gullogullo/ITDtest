@@ -196,7 +196,7 @@ twoafc = twoafc()
 
 # INITIALIZE STIMULI
 
-#stimulus = stimulus()
+stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
 al_counter = 4 # 40
@@ -276,7 +276,7 @@ def test_select():
     #loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
     return render_template('test_select.html') #, imgBald = imgBald)
 
-'''
+
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
     answer = 0
@@ -597,7 +597,7 @@ def test_2afc():
             'queries': queried, 'labels': labels}
     return render_template('test_2afc.html')
 
-'''
+
 '''
 if __name__== '__main__':
     app.secret_key = 'super secret key'

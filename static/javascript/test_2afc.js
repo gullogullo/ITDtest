@@ -72,7 +72,8 @@ function toggleClass() {
     $('#demo').text(JSON.stringify(data)).show();
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
-    //play(data.wav_location);
+    setTimeout(function() { play(data.wav_location);
+    }, 500);
     itd = data.itd;
     factor = data.factor;
     counter = data.counter;
