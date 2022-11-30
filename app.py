@@ -29,10 +29,10 @@ from sound import Stimulus as stimulus
 from acquisition import BALD as BALD
 from acquisition import Random as Random
 # from util import move_sample as move_sample
-from util import move_s
-from util import RMSELoss
+#from util import move_s
+#from util import RMSELoss
 from twoAFC import TwoAFC as twoafc
-from psychometric_curve import PsychometricCurve
+#from psychometric_curve import PsychometricCurve
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
@@ -99,7 +99,7 @@ def train(model, likelihood, optimizer, training_iterations, train_data, mll):
         optimizer.step()
     endTrain = time.time()
     # REMOVE
-    print('TRAIN TIME', endTrain - startTrain)
+    #print('TRAIN TIME', endTrain - startTrain)
 
 def test(model, likelihood, test_data, criterion):
     # startTest = time.time()
