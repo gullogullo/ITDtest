@@ -14,8 +14,19 @@ from matplotlib import pyplot as plt
 import torch
 import gpytorch
 from torch.optim import Adam
-from modules import CustomDataset as customDataset
+import secrets
+import time
+import os
+import errno
+import sys
+#import io
+#import base64
+import numpy as np
+# from copy import deepcopy
+sys.path.insert(0, os.getcwd() + '/modules')  
+from customDataset import CustomDataset as customDataset
 '''
+from modules.customDataset import CustomDataset as customDataset
 from modules.sound import Stimulus as stimulus
 from modules.acquisition import BALD as BALD
 from modules.acquisition import Random as Random
@@ -25,15 +36,6 @@ from modules.util import RMSELoss as RMSELoss
 from modules.twoAFC import TwoAFC as twoafc
 from modules.psychometric_curve import PsychometricCurve
 '''
-import secrets
-import time
-import os
-import errno
-#import sys
-#import io
-#import base64
-import numpy as np
-# from copy import deepcopy
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
