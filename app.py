@@ -29,15 +29,16 @@ from sound import Stimulus as stimulus
 from acquisition import BALD as BALD
 from acquisition import Random as Random
 # from util import move_sample as move_sample
-#from util import move_s
-#from util import RMSELoss
+from util import move_s
+from util import RMSELoss
 from twoAFC import TwoAFC as twoafc
-#from psychometric_curve import PsychometricCurve
+from psychometric_curve import PsychometricCurve
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
+'''
 torch.set_flush_denormal(True)
 plt.switch_backend('Agg')
 
@@ -223,7 +224,7 @@ yPoolmean = torch.mean(yPool)
 y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
 poolData_Bald = X_pool
 poolData_Random = X_pool
-
+'''
 test_scores_Bald = []
 queried_samples_Bald = []
 labels_Bald = []
@@ -237,6 +238,7 @@ PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+
 @app.route('/', methods =["POST", "GET"])
 def index():
     name = ""
