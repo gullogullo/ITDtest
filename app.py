@@ -25,23 +25,19 @@ import numpy as np
 # from copy import deepcopy
 sys.path.insert(0, os.getcwd() + '/modules')  
 from customDataset import CustomDataset as customDataset
-'''
-from modules.customDataset import CustomDataset as customDataset
-from modules.sound import Stimulus as stimulus
-from modules.acquisition import BALD as BALD
-from modules.acquisition import Random as Random
-# from modules.util import move_sample as move_sample
-from modules.util import move_s as move_s
-from modules.util import RMSELoss as RMSELoss
-from modules.twoAFC import TwoAFC as twoafc
-from modules.psychometric_curve import PsychometricCurve
-'''
+from sound import Stimulus as stimulus
+from acquisition import BALD as BALD
+from acquisition import Random as Random
+# from util import move_sample as move_sample
+from util import move_s
+from util import RMSELoss
+from twoAFC import TwoAFC as twoafc
+from psychometric_curve import PsychometricCurve
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
-'''
 torch.set_flush_denormal(True)
 plt.switch_backend('Agg')
 
@@ -241,7 +237,6 @@ PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-'''
 @app.route('/', methods =["POST", "GET"])
 def index():
     name = ""
@@ -261,7 +256,6 @@ def index():
     #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
     return render_template("index.html")
 
-'''
 @app.route('/test_select')
 def test_select():
     global queried_samples_Bald
@@ -281,7 +275,7 @@ def test_select():
     #loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
     return render_template('test_select.html') #, imgBald = imgBald)
 
-
+'''
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
     answer = 0
