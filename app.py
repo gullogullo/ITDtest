@@ -25,20 +25,19 @@ import numpy as np
 # from copy import deepcopy
 sys.path.insert(0, os.getcwd() + '/modules')  
 from customDataset import CustomDataset as customDataset
-from sound import Stimulus as stimulus
+#from sound import Stimulus as stimulus
 from acquisition import BALD as BALD
 from acquisition import Random as Random
 # from util import move_sample as move_sample
-from util import move_s
-from util import RMSELoss
-from twoAFC import TwoAFC as twoafc
-from psychometric_curve import PsychometricCurve
+#from util import move_s
+#from util import RMSELoss
+#from twoAFC import TwoAFC as twoafc
+#from psychometric_curve import PsychometricCurve
 
 # INITIALIZE FLASK APP
 secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
-'''
 torch.set_flush_denormal(True)
 plt.switch_backend('Agg')
 
@@ -193,11 +192,11 @@ mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Ran
 
 # INITIALIZE 2I-2AFC
 
-twoafc = twoafc()
+#twoafc = twoafc()
 
 # INITIALIZE STIMULI
 
-stimulus = stimulus()
+#stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
 al_counter = 4 # 40
@@ -209,8 +208,8 @@ train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bal
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Bald)
 train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
     training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
-score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, test_data=testData_Bald, criterion=RMSELoss)
-score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
+#score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, test_data=testData_Bald, criterion=RMSELoss)
+#score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
 
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
 pre_acquisition_model_state_Random = model_Random.state_dict()
@@ -224,7 +223,7 @@ yPoolmean = torch.mean(yPool)
 y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
 poolData_Bald = X_pool
 poolData_Random = X_pool
-'''
+
 test_scores_Bald = []
 queried_samples_Bald = []
 labels_Bald = []
