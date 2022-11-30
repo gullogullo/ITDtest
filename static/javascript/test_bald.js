@@ -59,8 +59,7 @@ function toggleClass() {
   }).done(function(data) {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
-    setTimeout(function() { play(data.wav_location);
-    }, 500);
+    //setTimeout(function() { play(data.wav_location);}, 500);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
