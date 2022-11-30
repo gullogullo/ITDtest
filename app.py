@@ -29,8 +29,8 @@ from customDataset import CustomDataset as customDataset
 from acquisition import BALD as BALD
 from acquisition import Random as Random
 # from util import move_sample as move_sample
-#from util import move_s
-#from util import RMSELoss
+from util import move_s
+from util import RMSELoss
 #from twoAFC import TwoAFC as twoafc
 #from psychometric_curve import PsychometricCurve
 
