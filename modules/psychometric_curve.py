@@ -101,7 +101,7 @@ class PsychometricCurve(BaseEstimator, RegressorMixin):
         return self._fit_func(x, **self.coefs_)
 
     def plot(self, x: np.array, y: np.ndarray, name, surname, seventynine) -> None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(1, 1)
 
         ax.plot(x, self.predict(x), label='Variance: {:.2f}'.format(self.coefs_['var']))
 

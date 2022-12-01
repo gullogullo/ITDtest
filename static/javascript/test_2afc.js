@@ -1,3 +1,19 @@
+const totalReverals = 1; //6;
+
+var itd = 0;
+var factor = 0;
+var counter = 0;
+var correctCounter = 0;
+var upsized = 0;
+var downsized = 0;
+var rightmost = 0;
+var reversals = 0;
+var downupReversals = 0;
+var queried = [];
+var labels = [];
+
+localStorage.setItem("twoafcDone", "false");
+
 var freezeClic = false;
 
 document.addEventListener("click", e => {
@@ -14,7 +30,6 @@ document.addEventListener("click", e => {
   }, 1000);
 }, true);
 
-
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
 
@@ -26,23 +41,6 @@ button1.addEventListener("click", toggleBtn1);
 
 const button2 = document.getElementById("btn2");
 button2.addEventListener("click", toggleBtn2);
-
-localStorage.setItem("twoafcDone", "false");
-var trials = 0;
-
-var itd = 0;
-var factor = 0;
-var counter = 0;
-var correctCounter = 0;
-var upsized = 0;
-var downsized = 0;
-var rightmost = 0;
-var reversals = 0;
-var downupReversals = 0;
-var queried = [];
-var labels = [];
-
-const totalReverals = 2; //6;
 
 function toggleClass() {
   $.ajax({
@@ -70,9 +68,7 @@ function toggleClass() {
     }
   }).done(function(data) {
     $('#demo').text(JSON.stringify(data)).show();
-    //$('#audioPlayer').attr('src', data.wav_location);
-    //$('audio')[0].play();
-    //setTimeout(function() { play(data.wav_location);}, 500);
+    play(data.wav_location);
     itd = data.itd;
     factor = data.factor;
     counter = data.counter;
@@ -120,7 +116,6 @@ function toggleBtn1() {
         //console.log(error);
     }
   }).done(function(data) {
-    $('#demo').text(JSON.stringify(data)).show();
     if (data.reversals >= totalReverals) {
       localStorage.setItem("twoafcDone", "true");
       redirect('/test_select');
@@ -137,6 +132,7 @@ function toggleBtn1() {
       downupReversals = data.downup_reversals;
       queried = data.queries;
       labels = data.labels;
+      //$('#demo').text(JSON.stringify(data)).show();
       document.getElementById("btn1").classList.toggle("goUp");
       document.getElementById("btn1").classList.toggle("comeDown");
       document.getElementById("btn2").classList.toggle("goDown");
@@ -197,18 +193,10 @@ function toggleBtn2() {
   });
 }
 
-
-function toggleExit() {
-  document.getElementById("closeB").classList.toggle("goDown", true);
-  setTimeout(function() { redirect('/test_select'); }, 500);
-}
-
-
 function redirect (url) {
   var ua        = navigator.userAgent.toLowerCase(),
       isIE      = ua.indexOf('msie') !== -1,
       version   = parseInt(ua.substr(4, 2), 10);
-
   // Internet Explorer 8 and lower
   if (isIE && version < 9) {
       var link = document.createElement('a');
@@ -216,14 +204,20 @@ function redirect (url) {
       document.body.appendChild(link);
       link.click();
   }
-
   // All other browsers can use the standard window.location.href (they don't lose HTTP_REFERER like Internet Explorer 8 & lower does)
   else { 
       window.location.href = url; 
   }
 }
-
+  
 function play(file) {
-  var audio = new Audio(file);
+  var url = file + "?cb=" + new Date().getTime();
+  var audio = new Audio(url);
+  audio.load();   
   audio.play();
+}
+
+function toggleExit() {
+  document.getElementById("closeB").classList.toggle("goDown", true);
+  setTimeout(function() { redirect('/test_select'); }, 500);
 }

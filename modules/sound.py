@@ -9,7 +9,7 @@ from scipy import stats
 import numpy as np
 import torch
 import torchaudio
-import sounddevice as sd
+#import sounddevice as sd
 import random
 
 
@@ -96,11 +96,13 @@ class Stimulus:
             return -60
 
 
-    def play(self, itd):
+    def play(self, itd, i=[0]):
         """ Play the reference and test stimuli with the given ITD difference
         Arguments:
             model -- the model
         """
+        i[0] += 1
+
         # ITD FROM MICROSECONDS TO SAMPLES
         samplesITD = int(itd * 0.5 * self.sample_rate_in * 10 ** (-6))
         # print('ITD in microseconds', 2 * samplesITD * (10 ** 6) / self.sample_rate_in)
@@ -139,11 +141,11 @@ class Stimulus:
         #sd.play(self.audio_out, self.sample_rate_out)
         #sd.wait()
         filename = 'audio/ITD.wav'
-        wav = 'static/audio/ITD.wav'
+        wav = 'static/audio/ITD' + str(i[0]%2) + '.wav'
         #os.remove(wav)
-        #wavfile.write(wav, self.sample_rate_out, self.audio_out)
-        sd.play(self.audio_out, self.sample_rate_out)
-        sd.wait()
+        wavfile.write(wav, self.sample_rate_out, self.audio_out)
+        #sd.play(self.audio_out, self.sample_rate_out)
+        #sd.wait()
 
         # RETURN THE RIGHTMOST STIMULUS
         return rightmost, wav

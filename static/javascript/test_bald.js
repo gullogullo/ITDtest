@@ -1,3 +1,17 @@
+const al_counter = 2;
+
+var trials = 0;
+var Xtrain = [];
+var ytrain = [];
+var pooldata = [];
+var scores = [];
+var queries = [];
+var labels = [];
+var itd = 0;
+var rightmost = 0;
+
+localStorage.setItem("baldDone", "false");
+
 var freezeClic = false;
 
 document.addEventListener("click", e => {
@@ -14,7 +28,6 @@ document.addEventListener("click", e => {
   }, 1000);
 }, true);
 
-
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
 
@@ -26,19 +39,6 @@ button1.addEventListener("click", toggleBtn1);
 
 const button2 = document.getElementById("btn2");
 button2.addEventListener("click", toggleBtn2);
-
-localStorage.setItem("baldDone", "false");
-const al_counter = 4;
-
-var trials = 0;
-var Xtrain = [];
-var ytrain = [];
-var pooldata = [];
-var scores = [];
-var queries = [];
-var labels = [];
-var itd = 0;
-var rightmost = 0;
 
 function toggleClass() {
   $.ajax({
@@ -60,6 +60,7 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
+    play(data.wav_location);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
@@ -69,7 +70,7 @@ function toggleClass() {
     queries = data.queries;
     rightmost = data.rightmost;
   });
-
+  document.getElementById("playDown").classList.remove("comeDown");
   document.getElementById("playDown").classList.toggle("goUp");
   setTimeout(function() {
     document.getElementById("btn1").classList.remove("goUp"); 
@@ -78,7 +79,6 @@ function toggleClass() {
     document.getElementById("btn2").classList.toggle("comeUp"); 
   }, 2000);
 }
-
 
 function toggleBtn1() {
   trials += 1;
@@ -104,13 +104,16 @@ function toggleBtn1() {
         //console.log(error);
     }
   }).done(function(data) {
-    //$('#demo').text(JSON.stringify(labels)).show();
+    $('#demo').text(JSON.stringify(data)).show();
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
     }
     else {
-      setTimeout(function() {document.getElementById("playDown").classList.toggle("goUp"); }, 250);
+      setTimeout(function() {
+        document.getElementById("playDown").classList.toggle("comeDown");
+        document.getElementById("playDown").classList.toggle("goUp"); 
+      }, 250);
       trials = data.trials;
       Xtrain = data.Xtrain;
       ytrain =data.ytrain;
@@ -125,7 +128,6 @@ function toggleBtn1() {
     }
   });
 }
-
 
 function toggleBtn2() {
   trials += 1;
@@ -151,13 +153,16 @@ function toggleBtn2() {
         //console.log(error);
     }
   }).done(function(data) {
-    //$('#demo').text(JSON.stringify(labels)).show();
+    $('#demo').text(JSON.stringify(data)).show();
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
     }
     else {
-      setTimeout(function() {document.getElementById("playDown").classList.toggle("goUp"); }, 250);
+      setTimeout(function() {
+        document.getElementById("playDown").classList.toggle("comeDown");
+        document.getElementById("playDown").classList.toggle("goUp"); 
+      }, 250);
       trials = data.trials;
       Xtrain = data.Xtrain;
       ytrain =data.ytrain;
@@ -173,18 +178,10 @@ function toggleBtn2() {
   });
 }
 
-
-function toggleExit() {
-  document.getElementById("closeB").classList.toggle("goDown", true);
-  setTimeout(function() { redirect('/test_select'); }, 500);
-}
-
-
 function redirect (url) {
   var ua        = navigator.userAgent.toLowerCase(),
       isIE      = ua.indexOf('msie') !== -1,
       version   = parseInt(ua.substr(4, 2), 10);
-
   // Internet Explorer 8 and lower
   if (isIE && version < 9) {
       var link = document.createElement('a');
@@ -192,7 +189,6 @@ function redirect (url) {
       document.body.appendChild(link);
       link.click();
   }
-
   // All other browsers can use the standard window.location.href (they don't lose HTTP_REFERER like Internet Explorer 8 & lower does)
   else { 
       window.location.href = url; 
@@ -200,6 +196,13 @@ function redirect (url) {
 }
 
 function play(file) {
-  var audio = new Audio(file);
+  var url = file + "?cb=" + new Date().getTime();
+  var audio = new Audio(url);
+  audio.load();   
   audio.play();
+}
+
+function toggleExit() {
+  document.getElementById("closeB").classList.toggle("goDown");
+  setTimeout(function() { redirect('/test_select'); }, 500);
 }

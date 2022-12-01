@@ -199,8 +199,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 4 # 40
-twoafc_counter = 2 #6
+al_counter = 2 # 40
+twoafc_counter = 1 #6
 
 # INITIAL TRAINING
 
@@ -242,19 +242,19 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 def index():
     name = ""
     surname = ""
-    #session['firstname'] = name
-    #session['surname'] = surname
+    session['firstname'] = name
+    session['surname'] = surname
     if request.method == "POST":
         name = str(request.values.get('name'))
         surname = str(request.values.get('lastname'))
-        #session['firstname'] = name
-        #session['surname'] = surname
+        session['firstname'] = name
+        session['surname'] = surname
         # REMOVE
     #print('firstname', session['firstname'])
     #print('surname', surname)
-    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
-    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
-    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
+    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
+    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
+    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
     return render_template("index.html")
 
 @app.route('/test_select')
@@ -376,6 +376,8 @@ def test_bald():
             'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
+    #if wavfile:
+    #    os.remove(wavfile)
     return render_template('test_bald.html')
 
 
@@ -473,6 +475,9 @@ def test_random():
             'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
+    #if wavfile:
+    #    os.remove(wavfile)
+    print('end 2afc')
     return render_template('test_random.html')
 
 
@@ -493,7 +498,7 @@ def test_2afc():
     upsized = 0
     downsized = 0
     # Starting ITD and step size
-    itd = twoafc.start_itd
+    itd = 200 #twoafc.start_itd
     factor = twoafc.initial_step
     reversals = twoafc.reversals
     downup_reversals = twoafc.downup_reversals
@@ -533,11 +538,12 @@ def test_2afc():
                 print('WRONG! and name ' + name + surname)
             # update counters and answers dictionary
             counter += 1
-            if correct_counter == 4:
-                correct_counter = 0
+            #if correct_counter == 4:
+            #    correct_counter = 0
             # queried.append(itd)
             labels.append(label)
             # first two tests: wrong -> up, right -> same
+            # WHY!?!?
             if counter <= 2:
                 if label == 0:
                     itd = factor * itd
@@ -558,6 +564,7 @@ def test_2afc():
                     if upsized:
                         reversals += 1
                         upsized = 0
+                    correct_counter = 0
                 # wrong -> up
                 if label == 0:
                     itd = factor * itd
@@ -568,7 +575,6 @@ def test_2afc():
                         reversals += 1
                         downup_reversals += 1
                         downsized = 0
-
             # count reversals only after the minimum step size
             if downup_reversals < 2:
                 reversals = 0
@@ -595,14 +601,15 @@ def test_2afc():
             'upsized': upsized, 'downsized': downsized, 'rightmost': rightmost,
             'reversals': reversals, 'downup_reversals': downup_reversals, 
             'queries': queried, 'labels': labels}
+    #if wavfile:
+    #    os.remove(wavfile)
     return render_template('test_2afc.html')
-
 
 '''
 if __name__== '__main__':
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
-    Session(app)
+    #Session(app)
     app.run(debug=True)
-
 '''
+

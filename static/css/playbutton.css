@@ -24,6 +24,10 @@ body {
   overflow: hidden;
 }
 .closeBtn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   position: absolute;
   left: 10%;
@@ -34,11 +38,15 @@ body {
   animation: bouncejs-closeHidden 2170ms linear 1 both;
 }
 .btnOne {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   position: absolute;
   left: 50%;
   top: 25%;
-  transform: translateX(-50%) translateY(-250%);
+  transform: translateX(-50%) translateY(-350%);
 }
 #btn1.comeDown {
   -webkit-animation: bouncejs-comeDown 1800ms linear 1 both;
@@ -49,11 +57,15 @@ body {
   animation: bouncejs-goUp 2170ms linear 1 both;
 }
 .btnTwo {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   position: absolute;
   left: 50%;
   top: 75%;
-  transform: translateX(-50%) translateY(150%);
+  transform: translateX(-50%) translateY(250%);
 }
 #btn2.comeUp {
   -webkit-animation: bouncejs-comeUp 1800ms linear 1 both;
