@@ -14,7 +14,7 @@ var labels = [];
 
 localStorage.setItem("twoafcDone", "false");
 
-var audio = new Audio();
+const audioContext = new AudioContext();
 
 var freezeClic = false;
 
@@ -214,7 +214,7 @@ function redirect (url) {
   
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  audio.src = url
+  var audio = new Audio(url);
   audio.load();   
   audio.play();
 }

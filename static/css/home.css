@@ -25,6 +25,10 @@ body {
   overflow: hidden;
 }
 .hithere {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   animation: hithere 2s ease infinite;
 }
 @keyframes hithere {
