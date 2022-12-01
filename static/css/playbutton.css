@@ -46,7 +46,7 @@ body {
   position: absolute;
   left: 50%;
   top: 25%;
-  transform: translateX(-50%) translateY(-350%);
+  transform: translateX(-50%) translateY(-250%);
 }
 #btn1.comeDown {
   -webkit-animation: bouncejs-comeDown 1800ms linear 1 both;
@@ -65,7 +65,7 @@ body {
   position: absolute;
   left: 50%;
   top: 75%;
-  transform: translateX(-50%) translateY(250%);
+  transform: translateX(-50%) translateY(150%);
 }
 #btn2.comeUp {
   -webkit-animation: bouncejs-comeUp 1800ms linear 1 both;
