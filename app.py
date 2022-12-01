@@ -605,11 +605,9 @@ def test_2afc():
     #    os.remove(wavfile)
     return render_template('test_2afc.html')
 
-'''
 if __name__== '__main__':
-    app.secret_key = 'super secret key'
+    #app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
     #Session(app)
     app.run(debug=True)
-'''
 

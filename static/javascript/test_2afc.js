@@ -14,6 +14,8 @@ var labels = [];
 
 localStorage.setItem("twoafcDone", "false");
 
+var audio = new Audio();
+
 var freezeClic = false;
 
 document.addEventListener("click", e => {
@@ -212,7 +214,7 @@ function redirect (url) {
   
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  var audio = new Audio(url);
+  audio.src = url
   audio.load();   
   audio.play();
 }
