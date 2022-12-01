@@ -12,7 +12,8 @@ var rightmost = 0;
 
 localStorage.setItem("baldDone", "false");
 
-var soundID = "ITD";
+const AudioContext = window.AudioContext;
+var audioCtx = new AudioContext();
 
 var freezeClic = false;
 
@@ -199,14 +200,23 @@ function redirect (url) {
 
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  createjs.Sound.registerSound(url, soundID);
-  createjs.Sound.play(soundID);
   //var audio = new Audio(url);
   //audio.load();   
   //audio.play();
+  var audioFile = fetch(url).then(
+    response => response.arrayBuffer()
+    ).then(
+      buffer => audioCtx.decodeAudioData(buffer)
+      ).then(
+        buffer => { var source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioCtx.destination);
+          source.start();
+        }
+      );
 };
 
 function toggleExit() {
   document.getElementById("closeB").classList.toggle("goDown");
   setTimeout(function() { redirect('/test_select'); }, 500);
-};
+}
