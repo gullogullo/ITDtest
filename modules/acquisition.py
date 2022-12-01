@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 import torch
 
-from modules.util import *
+from util import *
 
 
 class Acquirer:
