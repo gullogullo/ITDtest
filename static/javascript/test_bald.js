@@ -12,7 +12,7 @@ var rightmost = 0;
 
 localStorage.setItem("baldDone", "false");
 
-const audioContext = new AudioContext();
+var soundID = "ITD";
 
 var freezeClic = false;
 
@@ -80,7 +80,7 @@ function toggleClass() {
     document.getElementById("btn2").classList.remove("goDown"); 
     document.getElementById("btn2").classList.toggle("comeUp"); 
   }, 2000);
-}
+};
 
 function toggleBtn1() {
   trials += 1;
@@ -129,7 +129,7 @@ function toggleBtn1() {
       document.getElementById("btn2").classList.toggle("comeUp");
     }
   });
-}
+};
 
 function toggleBtn2() {
   trials += 1;
@@ -178,7 +178,7 @@ function toggleBtn2() {
       document.getElementById("btn2").classList.toggle("comeUp");
     }
   });
-}
+};
 
 function redirect (url) {
   var ua        = navigator.userAgent.toLowerCase(),
@@ -195,16 +195,18 @@ function redirect (url) {
   else { 
       window.location.href = url; 
   }
-}
+};
 
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  var audio = new Audio(url);
-  audio.load();   
-  audio.play();
-}
+  createjs.Sound.registerSound(url, soundID);
+  createjs.Sound.play(soundID);
+  //var audio = new Audio(url);
+  //audio.load();   
+  //audio.play();
+};
 
 function toggleExit() {
   document.getElementById("closeB").classList.toggle("goDown");
   setTimeout(function() { redirect('/test_select'); }, 500);
-}
+};

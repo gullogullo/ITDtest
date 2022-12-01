@@ -12,8 +12,6 @@ var rightmost = 0;
 
 localStorage.setItem("randomDone", "false");
 
-const audioContext = new AudioContext();
-
 var freezeClic = false;
 
 document.addEventListener("click", e => {

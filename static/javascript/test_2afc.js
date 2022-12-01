@@ -14,8 +14,6 @@ var labels = [];
 
 localStorage.setItem("twoafcDone", "false");
 
-const audioContext = new AudioContext();
-
 var freezeClic = false;
 
 document.addEventListener("click", e => {
