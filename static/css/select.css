@@ -41,7 +41,7 @@ body {
 .hithere1 {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 20%;
@@ -51,7 +51,7 @@ body {
 .hithere2 {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 50%;
@@ -61,7 +61,7 @@ body {
 .hithere3 {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 80%;
@@ -71,7 +71,7 @@ body {
 #twoafcPlot {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 2.5%;
@@ -82,7 +82,7 @@ body {
 #baldPlot {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 35%;
@@ -93,7 +93,7 @@ body {
 #randomPlot {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: left;
   position: absolute;
   left: 67.5%;
