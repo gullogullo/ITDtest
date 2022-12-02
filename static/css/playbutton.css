@@ -38,10 +38,6 @@ body {
   animation: bouncejs-closeHidden 2170ms linear 1 both;
 }
 .btnOne {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   cursor: pointer;
   position: absolute;
   left: 50%;
@@ -57,10 +53,6 @@ body {
   animation: bouncejs-goUp 2170ms linear 1 both;
 }
 .btnTwo {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   cursor: pointer;
   position: absolute;
   left: 50%;
@@ -80,7 +72,7 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translateX(-50%) translateY(-150%);
+  transform: translateX(-50%) translateY(-100%);
 }
 #play {
   -webkit-animation: bouncejs-playVisible 1800ms linear 1 both;
