@@ -9,10 +9,9 @@ var queries = [];
 var labels = [];
 var itd = 0;
 var rightmost = 0;
+var wav_location = "";
 
 localStorage.setItem("randomDone", "false");
-
-var audio = new Audio(url);
 
 var freezeClic = false;
 
@@ -32,6 +31,8 @@ document.addEventListener("click", e => {
 
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
+//document.querySelector('#playDown').onclick = () => setTimeout(function() { 
+//  playCustom(wav_location);}, 500);
 
 const exit = document.getElementById("closeB");
 exit.addEventListener("click", toggleExit);
@@ -62,7 +63,8 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
-    //playCustom(data.wav_location);
+    playCustom(data.wav_location);
+    //wav_location = data.wav_location;
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
@@ -197,12 +199,19 @@ function redirect (url) {
   }
 };
 
-function playCustom(file) {
-  var url = file + "?cb=" + new Date().getTime();
-  //audio.load();
-  audio.src = url;   
-  audio.play();
-};
+const playCustom = (() => {
+  let context = null;
+  return async url => {
+    if (context) context.close();
+    context = new AudioContext();
+    const source = context.createBufferSource();
+    source.buffer = await fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
+    source.connect(context.destination);
+    source.start();
+  };
+})();
 
 function toggleExit() {
   document.getElementById("closeB").classList.toggle("goDown");

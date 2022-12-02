@@ -68,7 +68,7 @@ function toggleClass() {
     }
   }).done(function(data) {
     $('#demo').text(JSON.stringify(data)).show();
-    //play(data.wav_location);
+    play(data.wav_location);
     itd = data.itd;
     factor = data.factor;
     counter = data.counter;

@@ -11,7 +11,6 @@ import torch
 import torchaudio
 #import sounddevice as sd
 import random
-from playsound import playsound
 
 
 class Stimulus:
@@ -144,7 +143,7 @@ class Stimulus:
         wavfile.write(wav, self.sample_rate_out, self.audio_out)
         #sd.play(self.audio_out, self.sample_rate_out)
         #sd.wait()
-        playsound(wav)
+        #playsound(wav)
 
         # RETURN THE RIGHTMOST STIMULUS
         return rightmost, wav
