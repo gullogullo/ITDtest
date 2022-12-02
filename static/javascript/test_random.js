@@ -63,7 +63,8 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
-    playCustom(data.wav_location);
+    var url = data.wav_location + "?cb=" + new Date().getTime();
+    playCustom(url);
     //wav_location = data.wav_location;
     trials = data.trials
     itd = data.itd;
