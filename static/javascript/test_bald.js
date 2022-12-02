@@ -12,9 +12,6 @@ var rightmost = 0;
 
 localStorage.setItem("baldDone", "false");
 
-const AudioContext = window.AudioContext;
-var audioCtx = new AudioContext();
-
 var freezeClic = false;
 
 document.addEventListener("click", e => {
@@ -63,8 +60,9 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
-    var url = data.wav_location + "?cb=" + new Date().getTime();
-    playCustom(url);
+    //var url = data.wav_location + "?cb=" + new Date().getTime();
+    //playCustom(url);
+    play(data.wav_location);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
@@ -202,16 +200,15 @@ function redirect (url) {
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
   var audio = new Audio(url);
-  audio.load();   
   audio.play();
 };
 
 const playCustom = (() => {
   let context = null;
   return async url => {
-    //if (context) context.close();
-    //context = new AudioContext();
-    const source = audioCtx.createBufferSource();
+    if (context) context.close();
+    context = new AudioContext();
+    const source = context.createBufferSource();
     source.buffer = await fetch(url)
       .then(res => res.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer));

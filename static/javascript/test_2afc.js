@@ -14,9 +14,6 @@ var labels = [];
 
 localStorage.setItem("twoafcDone", "false");
 
-const AudioContext = window.AudioContext;
-var audioCtx = new AudioContext();
-
 var freezeClic = false;
 
 document.addEventListener("click", e => {
@@ -215,17 +212,16 @@ function redirect (url) {
   
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  var audio = new Audio(url);
-  audio.load();   
+  var audio = new Audio(url);   
   audio.play();
 }
 
 const playCustom = (() => {
   let context = null;
   return async url => {
-    //if (context) context.close();
-    //context = new AudioContext();
-    const source = audioCtx.createBufferSource();
+    if (context) context.close();
+    context = new AudioContext();
+    const source = context.createBufferSource();
     source.buffer = await fetch(url)
       .then(res => res.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
