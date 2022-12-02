@@ -30,6 +30,9 @@ document.addEventListener("click", e => {
 
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
+button.addEventListener("click", setTimeout(function() { 
+  var url = data.wav_location + "?cb=" + new Date().getTime();
+  playCustom(url);}, 500));
 
 const exit = document.getElementById("closeB");
 exit.addEventListener("click", toggleExit);
@@ -58,10 +61,10 @@ function toggleClass() {
     }
   }).done(function(data) {
     //$('#audioPlayer').attr('src', data.wav_location);
-    //$('audio')[0].play();
+    //$('audio')[0].play();0
     //setTimeout(function() { play(data.wav_location);}, 500);
-    var url = data.wav_location + "?cb=" + new Date().getTime();
-    playCustom(url);
+    //var url = data.wav_location + "?cb=" + new Date().getTime();
+    //playCustom(url);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
