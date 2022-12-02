@@ -32,7 +32,7 @@ document.addEventListener("click", e => {
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
 button.addEventListener("click", setTimeout(function() { 
-  var url = data.wav_location + "?cb=" + new Date().getTime();
+  var url = wav_location + "?cb=" + new Date().getTime();
   playCustom(url);}, 500));
 
 const exit = document.getElementById("closeB");
