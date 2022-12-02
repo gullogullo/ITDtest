@@ -11,10 +11,8 @@ import torch
 import torchaudio
 #import sounddevice as sd
 import random
+from playsound import playsound
 
-
-# MICHELE: BETTER TO INCREASE SAMPLING FREQUENCY TO WRITE DOWN THE ITD OR
-# SUFFICIENT TO DEPLOY  TIME SCHEDULING? time.sleep(microseconds/1000000.0)
 
 class Stimulus:
     """ Base class for sound stimulus
@@ -146,6 +144,7 @@ class Stimulus:
         wavfile.write(wav, self.sample_rate_out, self.audio_out)
         #sd.play(self.audio_out, self.sample_rate_out)
         #sd.wait()
+        playsound(wav)
 
         # RETURN THE RIGHTMOST STIMULUS
         return rightmost, wav
