@@ -63,7 +63,8 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
-    play(data.wav_location);
+    var url = data.wav_location + "?cb=" + new Date().getTime();
+    playCustom(url);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
@@ -200,21 +201,25 @@ function redirect (url) {
 
 function play(file) {
   var url = file + "?cb=" + new Date().getTime();
-  //var audio = new Audio(url);
-  //audio.load();   
-  //audio.play();
-  var audioFile = fetch(url).then(
-    response => response.arrayBuffer()
-    ).then(
-      buffer => audioCtx.decodeAudioData(buffer)
-      ).then(
-        buffer => { var source = audioCtx.createBufferSource();
-          source.buffer = buffer;
-          source.connect(audioCtx.destination);
-          source.start();
-        }
-      );
+  var audio = new Audio(url);
+  audio.load();   
+  audio.play();
 };
+
+const playCustom = (() => {
+  let context = null;
+  return async url => {
+    //if (context) context.close();
+    //context = new AudioContext();
+    const source = audioCtx.createBufferSource();
+    source.buffer = await fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
+    $('#demo').text('played!').show();
+    source.connect(context.destination);
+    source.start();
+  };
+})();
 
 function toggleExit() {
   document.getElementById("closeB").classList.toggle("goDown");

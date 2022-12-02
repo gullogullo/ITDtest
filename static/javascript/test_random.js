@@ -9,7 +9,6 @@ var queries = [];
 var labels = [];
 var itd = 0;
 var rightmost = 0;
-var wav_location = "";
 
 localStorage.setItem("randomDone", "false");
 
@@ -31,8 +30,6 @@ document.addEventListener("click", e => {
 
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
-//document.querySelector('#playDown').onclick = () => setTimeout(function() { 
-//  playCustom(wav_location);}, 500);
 
 const exit = document.getElementById("closeB");
 exit.addEventListener("click", toggleExit);
@@ -65,7 +62,6 @@ function toggleClass() {
     //setTimeout(function() { play(data.wav_location);}, 500);
     var url = data.wav_location + "?cb=" + new Date().getTime();
     playCustom(url);
-    //wav_location = data.wav_location;
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;
@@ -209,6 +205,7 @@ const playCustom = (() => {
     source.buffer = await fetch(url)
       .then(res => res.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
+    $('#demo').text('played!').show();
     source.connect(context.destination);
     source.start();
   };
