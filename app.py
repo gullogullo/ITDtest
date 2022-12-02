@@ -199,8 +199,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 2 # 40
-twoafc_counter = 1 #6
+al_counter = 40 # 40
+twoafc_counter = 6 #6
 
 # INITIAL TRAINING
 

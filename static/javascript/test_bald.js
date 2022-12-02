@@ -1,4 +1,4 @@
-const al_counter = 2;
+const al_counter = 40;
 
 var trials = 0;
 var Xtrain = [];
@@ -21,7 +21,7 @@ document.addEventListener("click", e => {
   if (freezeClic) {
     e.stopPropagation();
     e.preventDefault();
-    $('#demo').text('clickkkk').show();
+    //('#demo').text('clickkkk').show();
   }
   setTimeout(function() {
     freezeClic = false
@@ -106,7 +106,7 @@ function toggleBtn1() {
         //console.log(error);
     }
   }).done(function(data) {
-    $('#demo').text(JSON.stringify(data)).show();
+    //$('#demo').text(JSON.stringify(data)).show();
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
@@ -155,7 +155,7 @@ function toggleBtn2() {
         //console.log(error);
     }
   }).done(function(data) {
-    $('#demo').text(JSON.stringify(data)).show();
+    //$('#demo').text(JSON.stringify(data)).show();
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
@@ -212,7 +212,7 @@ const playCustom = (() => {
     source.buffer = await fetch(url)
       .then(res => res.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
-    $('#demo').text('played!').show();
+    //$('#demo').text('played!').show();
     source.connect(context.destination);
     source.start();
   };

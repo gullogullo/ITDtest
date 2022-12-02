@@ -1,4 +1,4 @@
-const totalReverals = 1; //6;
+const totalReverals = 6; //6;
 
 var itd = 0;
 var factor = 0;
@@ -23,7 +23,7 @@ document.addEventListener("click", e => {
   if (freezeClic) {
     e.stopPropagation();
     e.preventDefault();
-    $('#demo').text('clickkkk').show();
+    //$('#demo').text('clickkkk').show();
   }
   setTimeout(function() {
     freezeClic = false
@@ -67,7 +67,7 @@ function toggleClass() {
         //console.log(error);
     }
   }).done(function(data) {
-    $('#demo').text(JSON.stringify(data)).show();
+    //$('#demo').text(JSON.stringify(data)).show();
     play(data.wav_location);
     itd = data.itd;
     factor = data.factor;
@@ -168,7 +168,7 @@ function toggleBtn2() {
         //console.log(error);
     }
   }).done(function(data) {
-    $('#demo').text(JSON.stringify(data)).show();
+    //$('#demo').text(JSON.stringify(data)).show();
     if (data.reversals >= totalReverals) {
       localStorage.setItem("twoafcDone", "true");
       redirect('/test_select');
@@ -225,7 +225,7 @@ const playCustom = (() => {
     source.buffer = await fetch(url)
       .then(res => res.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
-    $('#demo').text('played!').show();
+    //$('#demo').text('played!').show();
     source.connect(context.destination);
     source.start();
   };
