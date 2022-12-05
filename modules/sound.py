@@ -16,9 +16,9 @@ import random
 class Stimulus:
     """ Base class for sound stimulus
     """
-    def __init__(self, sample_rate_in=10000000, sample_rate_out=48000, sensitivity = 117.53,
-        Vat0dBFS = 0.9163, length_in_seconds = 0.5, interstimulus = 0.05,
-        dB_SPL = 70, lowcut = 20, highcut = 1400):
+    def __init__(self, sample_rate_in=10000000, sample_rate_out=48000, sensitivity=117.53,
+        Vat0dBFS=0.9163, length_in_seconds=0.5, interstimulus=0.05, sample_width=24,
+        dB_SPL=70, lowcut=20, highcut=1400):
         """
         Noise synthesis:
         Arguments:
@@ -39,6 +39,9 @@ class Stimulus:
         self.sample_rate_out = sample_rate_out
         self.sensitivity = sensitivity
         self.Vat0dBFS = Vat0dBFS
+        self.sample_width = sample_width
+        # since half is above 0 and half is below the max amplitude is divided
+        self.max_possible_amplitude = 1 #(2 ** self.sample_width) / 2
         self.resampler = torchaudio.transforms.Resample(self.sample_rate_in, self.sample_rate_out)
 
         # SOUND SETTINGS
@@ -73,24 +76,29 @@ class Stimulus:
         self.enveloped = filtered * adsr
 
         # AMPLITUDE TODO !!!!!!
-        dB_FS = dB_SPL - sensitivity + Vat0dBFS
         rms = self.rms(self.enveloped)
+        print('rms pre', rms)
+        print('dBFS pre', self.dBFS(self.enveloped))
+        print('dB_SPL pre', self.dBFS(self.enveloped) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
+        dB_FS = self.dB_SPL - self.sensitivity + 20 * np.log10(Vat0dBFS / 0.775)
         gain =  (10 ** (dB_FS / 20)) / rms
-        # print('gain', gain)
-        self.stimulus = self.enveloped # * gain
+        print('gain', gain)
+        print('dBFS post', self.dBFS(self.enveloped * gain))
+        self.stimulus = self.enveloped * gain
+        print('dB_SPL post', self.dBFS(self.stimulus) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
 
-    
     def rms(self, arr):
         return np.sqrt(np.mean(np.square(arr), axis=-1))
 
-    
-    def convert_to_decibel(self, arr):
-        """Just for checking"""
+    def dBFS(self, arr):
+        """Convert to dBFS"""
         rms = self.rms(arr)
         if rms !=0:
-            return 20 * np.log10(rms)
+            return 20 * np.log10(rms / self.max_possible_amplitude)
         else:
-            return -60
+            return -90
+
+    
 
 
     def play(self, itd, i=[0]):
