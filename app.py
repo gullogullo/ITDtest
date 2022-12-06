@@ -111,6 +111,8 @@ def test(model, likelihood, test_data, criterion):
         # print('RMSE SCORE: ', score)
     # endTest = time.time()
     # print('TEST TIME', endTest - startTest)
+    print('test_data', test_data.inputs)
+    print('observed_pred.mean', observed_pred.mean)
     return score.item(), observed_pred
 
 # SAVE AND LOAD INITIAL MODELS
@@ -204,8 +206,10 @@ train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bal
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Bald)
 train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
     training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
-score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, test_data=testData_Bald, criterion=RMSELoss)
-score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
+#score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, 
+#    test_data=testData_Bald, criterion=RMSELoss)
+#score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
+#    test_data=testData_Random, criterion=RMSELoss)
 
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
 pre_acquisition_model_state_Random = model_Random.state_dict()
@@ -339,6 +343,7 @@ def test_bald():
             score, pred_prob = test(model=model_Bald, likelihood=likelihood_Bald,
                 test_data=testData_Bald, criterion=RMSELoss)
             scores.append(score)
+            #print('score', score)
         # print('queried', queried)
         # print('labels', labels)
         if trials == al_counter:
@@ -346,7 +351,8 @@ def test_bald():
             f, ax = plt.subplots(1, 1)
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
-            ax.scatter(trainData_Bald.inputs.reshape(-1, 1).numpy(), trainData_Bald.labels.numpy(),  marker='*')
+            ax.scatter(trainData_Bald.inputs.reshape(-1, 1).numpy(), trainData_Bald.labels.numpy(),  
+                marker='*')
             ax.scatter(queried, labels,  marker='d', color='b')
             ax.plot(testData_Bald.inputs.numpy(), pred_prob.mean, 'r')
             double_std = torch.sqrt(pred_prob.variance)
@@ -356,7 +362,8 @@ def test_bald():
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
             # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
-            ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, color='r')
+            ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, 
+                color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
             ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Bald.inputs[seventy_index].item()))
@@ -365,6 +372,8 @@ def test_bald():
             #pngImageB64String = "data:image/png;base64,"
             #pngImageB64String += base64.b64encode(pngImage.getvalue()).decode('utf8')
             #session['imageBald'] = pngImageB64String
+            print('test_data', testData_Bald.inputs.numpy())
+            print('observed_pred.mean', pred_prob.mean)
             print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
@@ -450,7 +459,8 @@ def test_random():
             f, ax = plt.subplots(1, 1)
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
-            ax.scatter(trainData_Random.inputs.reshape(-1, 1).numpy(), trainData_Random.labels.numpy(),  marker='*')
+            ax.scatter(trainData_Random.inputs.reshape(-1, 1).numpy(), trainData_Random.labels.numpy(),  
+                marker='*')
             ax.scatter(queried, labels,  marker='d', color='b')
             ax.plot(testData_Random.inputs.numpy(), pred_prob.mean, 'r')
             double_std = torch.sqrt(pred_prob.variance)
@@ -460,10 +470,13 @@ def test_random():
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
             # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
-            ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, color='r')
+            ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), 
+                alpha=0.5, color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
             ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Random.inputs[seventy_index].item()))
+            print('test_data', testData_Random.inputs.numpy())
+            print('observed_pred.mean', pred_prob.mean)
             print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
             plt.close(f)
@@ -587,6 +600,8 @@ def test_2afc():
             predictions = pc.predict(unique_itds)
             seventynine_percent = min(predictions, key= lambda x: abs(x - 0.794))
             seventy_index = (predictions == seventynine_percent).nonzero()[0].item()
+            print('test_data', testData_Bald.inputs.numpy())
+            print('observed_pred.mean', pc.predict(testData_Bald.inputs.numpy()))
             print('saving image')
             pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
             # print(pc.score(itds_sorted, labels_sorted))
