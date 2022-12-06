@@ -118,20 +118,30 @@ def test(model, likelihood, test_data, criterion):
 # SAVE AND LOAD INITIAL MODELS
 
 def saveInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
+    global pre_acquisition_model_state_Bald
+    global pre_acquisition_ll_state_Bald
+    global pre_acquisition_model_state_Random
+    global pre_acquisition_ll_state_Random
     torch.save(pre_acquisition_model_state_Bald, pathBald)
-    torch.save(pre_acquisition_model_state_Bald, pathllBald)
+    torch.save(pre_acquisition_ll_state_Bald, pathllBald)
     torch.save(pre_acquisition_model_state_Random, pathRandom)
     torch.save(pre_acquisition_ll_state_Random, pathllRandom)
 
 def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
     global model_Bald
+    global X_train_Bald
     global likelihood_Bald
     global model_Random
+    global X_train_Random
     global likelihood_Random
-    model_Bald = torch.load(pathBald)
-    likelihood_Bald = torch.load(pathllBald)
-    model_Random = torch.load(pathRandom)
-    likelihood_Random = torch.load(pathllRandom)
+    model_Bald = GPClassificationModel(X_train_Bald)
+    model_Bald.load_state_dict(torch.load(pathBald))
+    likelihood_Bald = BernoulliLikelihood()
+    likelihood_Bald.load_state_dict(torch.load(pathllBald))
+    model_Random = GPClassificationModel(X_train_Random)
+    model_Random.load_state_dict(torch.load(pathRandom))
+    likelihood_Random = BernoulliLikelihood()
+    likelihood_Random.load_state_dict(torch.load(pathllRandom))
 
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
@@ -197,7 +207,7 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 25 # 40
+al_counter = 5 # 40
 twoafc_counter = 6 #6
 
 # INITIAL TRAINING
@@ -215,6 +225,8 @@ pre_acquisition_model_state_Bald = model_Bald.state_dict()
 pre_acquisition_model_state_Random = model_Random.state_dict()
 pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
 pre_acquisition_ll_state_Random = likelihood_Random.state_dict()
+
+
 
 # INITIALIZE POOL DATA
 X_pool = torch.linspace(1, 70, 70) #100, 100)
@@ -236,7 +248,7 @@ PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
 PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
-# saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
 
 @app.route('/', methods =["POST", "GET"])
 def index():
@@ -273,7 +285,7 @@ def test_select():
     queried_samples_Random = []
     #imgBald = session.get('imageBald', None)
     # TODO CHECK WHERE TO LOAD INIT MODELS
-    #loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+    loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
     return render_template('test_select.html') #, imgBald = imgBald)
 
 
@@ -285,6 +297,10 @@ def test_bald():
     rightmost = 0
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
+    if name == 'None':
+        name = ''
+    if surname == 'None':
+        surname = ''
     pool = poolData_Bald
     queried = queried_samples_Bald
     labels = labels_Bald
@@ -295,7 +311,7 @@ def test_bald():
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
         #play = int(request.values.get('ajaxPlay'))
-        if request.values.getlist('queried_samples_Bald'):
+        if request.values.getlist('poolData_Bald'):
             # RECEIVE AND BUILD TRAIN DATA
             X_traind = torch.Tensor(list(map(float, request.values.getlist('X_train_Bald'))))
             y_traind = torch.Tensor(list(map(float, request.values.getlist('y_train_Bald'))))
@@ -310,7 +326,6 @@ def test_bald():
         best_sample = acquirer.select_samples(model_Bald, likelihood_Bald, pool)
         # print('ITD', best_sample.item())
         # print('answer', answer)
-        print('pool', pool)
         if answer == 0:
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
@@ -329,6 +344,8 @@ def test_bald():
             # move that data from the pool to the training set
             pool = move_s(best_sample, label, pool, traind)
 
+            #remodel_Bald = GPClassificationModel(traind.inputs)
+
             # init the optimizer
             optimizer_Bald = Adam(model_Bald.parameters(), lr=lr)
 
@@ -346,8 +363,8 @@ def test_bald():
                 test_data=testData_Bald, criterion=RMSELoss)
             scores.append(score)
             #print('score', score)
-        # print('queried', queried)
-        # print('labels', labels)
+        print('queried', queried)
+        print('labels', labels)
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -368,6 +385,7 @@ def test_bald():
                 color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
+            print('testData_Bald.inputs[seventy_index]', testData_Bald.inputs[seventy_index])
             ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Bald.inputs[seventy_index].item()))
             #pngImage = io.BytesIO()
             #FigureCanvas(f).print_png(pngImage)
@@ -379,6 +397,7 @@ def test_bald():
             #print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
+        #print('pool', pool)
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
@@ -396,6 +415,10 @@ def test_random():
     rightmost = 0
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
+    if name == 'None':
+        name = ''
+    if surname == 'None':
+        surname = ''
     pool = poolData_Random
     queried = queried_samples_Random
     labels = labels_Random
@@ -476,6 +499,7 @@ def test_random():
                 alpha=0.5, color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
+            print('testData_Random.inputs[seventy_index]', testData_Random.inputs[seventy_index])
             ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Random.inputs[seventy_index].item()))
             print('test_data', testData_Random.inputs.numpy())
             print('observed_pred.mean', pred_prob.mean)

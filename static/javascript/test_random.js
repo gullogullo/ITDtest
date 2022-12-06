@@ -1,4 +1,4 @@
-const al_counter = 25;
+const al_counter = 5;
 
 var trials = 0;
 var Xtrain = [];
@@ -9,7 +9,6 @@ var queries = [];
 var labels = [];
 var itd = 0;
 var rightmost = 0;
-//var wav_location = "";
 
 localStorage.setItem("randomDone", "false");
 
@@ -51,6 +50,8 @@ function toggleClass() {
     {
       'answer': 0,
       'trials': trials,
+      'poolData_Random': pooldata,
+      'queried_samples_Random': queries,
     },
     traditional: true,
     type: 'POST',
@@ -66,7 +67,6 @@ function toggleClass() {
     //setTimeout(function() { play(data.wav_location);}, 500);
     var url = data.wav_location + "?cb=" + new Date().getTime();
     playCustom(url);
-    //wav_location = data.wav_location;
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;

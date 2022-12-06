@@ -1,4 +1,4 @@
-const al_counter = 25;
+const al_counter = 5;
 
 var trials = 0;
 var Xtrain = [];
@@ -47,6 +47,8 @@ function toggleClass() {
     {
       'answer': 0,
       'trials': trials,
+      'poolData_Bald': pooldata,
+      'queried_samples_Bald': queries,
     },
     traditional: true,
     type: 'POST',
