@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 #import time
-import os
+#import os
 
 import scipy.signal as sps
 from scipy import stats
@@ -77,15 +77,15 @@ class Stimulus:
 
         # AMPLITUDE TODO !!!!!!
         rms = self.rms(self.enveloped)
-        print('rms pre', rms)
-        print('dBFS pre', self.dBFS(self.enveloped))
-        print('dB_SPL pre', self.dBFS(self.enveloped) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
+        #print('rms pre', rms)
+        #print('dBFS pre', self.dBFS(self.enveloped))
+        #print('dB_SPL pre', self.dBFS(self.enveloped) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
         dB_FS = self.dB_SPL - self.sensitivity + 20 * np.log10(Vat0dBFS / 0.775)
         gain =  (10 ** (dB_FS / 20)) / rms
-        print('gain', gain)
-        print('dBFS post', self.dBFS(self.enveloped * gain))
+        #print('gain', gain)
+        #print('dBFS post', self.dBFS(self.enveloped * gain))
         self.stimulus = self.enveloped * gain
-        print('dB_SPL post', self.dBFS(self.stimulus) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
+        #print('dB_SPL post', self.dBFS(self.stimulus) + self.sensitivity - 20 * np.log10(Vat0dBFS / 0.775))
 
     def rms(self, arr):
         return np.sqrt(np.mean(np.square(arr), axis=-1))
@@ -97,9 +97,6 @@ class Stimulus:
             return 20 * np.log10(rms / self.max_possible_amplitude)
         else:
             return -90
-
-    
-
 
     def play(self, itd, i=[0]):
         """ Play the reference and test stimuli with the given ITD difference

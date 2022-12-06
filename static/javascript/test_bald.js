@@ -60,9 +60,9 @@ function toggleClass() {
     //$('#audioPlayer').attr('src', data.wav_location);
     //$('audio')[0].play();
     //setTimeout(function() { play(data.wav_location);}, 500);
-    //var url = data.wav_location + "?cb=" + new Date().getTime();
-    //playCustom(url);
-    play(data.wav_location);
+    //play(data.wav_location);
+    var url = data.wav_location + "?cb=" + new Date().getTime();
+    playCustom(url);
     trials = data.trials
     itd = data.itd;
     Xtrain = data.Xtrain;

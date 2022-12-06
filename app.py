@@ -1,7 +1,11 @@
 # IMPORTS
 
 from flask import Flask, request, session, render_template
-# from flask_session.__init__ import Session
+
+import torch
+from torch.optim import Adam
+
+import gpytorch
 from gpytorch.models import ApproximateGP
 from gpytorch.variational import CholeskyVariationalDistribution
 from gpytorch.variational import VariationalStrategy
@@ -9,26 +13,18 @@ from gpytorch.likelihoods import BernoulliLikelihood
 from gpytorch.mlls import VariationalELBO
 
 from matplotlib import pyplot as plt
-#from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
-import torch
-import gpytorch
-from torch.optim import Adam
+import numpy as np
 import secrets
 import time
 import os
 import errno
 import sys
-#import io
-#import base64
-import numpy as np
-# from copy import deepcopy
+
 sys.path.insert(0, os.getcwd() + '/modules')  
 from customDataset import CustomDataset as customDataset
 from sound import Stimulus as stimulus
 from acquisition import BALD as BALD
 from acquisition import Random as Random
-# from util import move_sample as move_sample
 from util import move_s
 from util import RMSELoss
 from twoAFC import TwoAFC as twoafc
@@ -74,7 +70,7 @@ class GPClassificationModel(ApproximateGP):
             variational_distribution, learn_inducing_locations=True)
         super(GPClassificationModel, self).__init__(variational_strategy)
         self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
+        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.LinearKernel()) #RBFKernel())
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -138,20 +134,20 @@ def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
 
-X_train_1 = torch.linspace(1, 10, 10)
+X_train_1 = torch.linspace(1, 8, 8) # 10, 10)
 yTrain_1 = PF_test_function(X_train_1)
 yTrainmean_1 = torch.mean(yTrain_1)
 y_train_1 = torch.sign(yTrain_1 - yTrainmean_1).add(1).div(2)
-#for n, lowdelay in enumerate(y_train_1):
-#    if np.random.uniform(0, 1) <= GAMMA:
-#        y_train_1[n] = 1
+for n, lowdelay in enumerate(y_train_1):
+    if np.random.uniform(0, 1) <= GAMMA:
+        y_train_1[n] = 1
 X_train_2 = torch.linspace(60, 100, 41)
 yTrain_2 = PF_test_function(X_train_2)
 yTrainmean_2 = torch.mean(yTrain_2)
 y_train_2 = torch.sign(yTrain_2 - yTrainmean_2).add(1).div(2)
-#for n, highdelay in enumerate(y_train_2):
-#    if np.random.uniform(0, 1) <= DELTA:
-#        y_train_2[n] = 0
+for n, highdelay in enumerate(y_train_2):
+    if np.random.uniform(0, 1) <= DELTA:
+        y_train_2[n] = 0
 X_train_Bald = torch.cat((X_train_1, X_train_2))
 X_train_Random = torch.cat((X_train_1, X_train_2))
 y_train = torch.cat((y_train_1, y_train_2))
@@ -180,7 +176,7 @@ likelihood_Random = BernoulliLikelihood()
 # INITIALIZE ML PARAMETERS
 
 lr = 0.1
-training_iterations = 50
+training_iterations = 100 #50
 
 # Use the adam optimizer
 optimizer_init_Bald = Adam(model_Bald.parameters(), lr=lr)
@@ -199,7 +195,7 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 40 # 40
+al_counter = 25 # 40
 twoafc_counter = 6 #6
 
 # INITIAL TRAINING
@@ -217,7 +213,7 @@ pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
 pre_acquisition_ll_state_Random = likelihood_Random.state_dict()
 
 # INITIALIZE POOL DATA
-X_pool = torch.linspace(1, 100, 100)
+X_pool = torch.linspace(1, 70, 70) #100, 100)
 yPool = PF_test_function(X_pool)
 yPoolmean = torch.mean(yPool)
 y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
@@ -351,7 +347,7 @@ def test_bald():
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
             ax.scatter(trainData_Bald.inputs.reshape(-1, 1).numpy(), trainData_Bald.labels.numpy(),  marker='*')
-            ax.scatter(queried, labels,  marker='*', color='b')
+            ax.scatter(queried, labels,  marker='d', color='b')
             ax.plot(testData_Bald.inputs.numpy(), pred_prob.mean, 'r')
             double_std = torch.sqrt(pred_prob.variance)
             lower = pred_prob.mean - double_std
@@ -455,7 +451,7 @@ def test_random():
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
             ax.scatter(trainData_Random.inputs.reshape(-1, 1).numpy(), trainData_Random.labels.numpy(),  marker='*')
-            ax.scatter(queried, labels,  marker='*', color='b')
+            ax.scatter(queried, labels,  marker='d', color='b')
             ax.plot(testData_Random.inputs.numpy(), pred_prob.mean, 'r')
             double_std = torch.sqrt(pred_prob.variance)
             lower = pred_prob.mean - double_std
@@ -498,7 +494,7 @@ def test_2afc():
     upsized = 0
     downsized = 0
     # Starting ITD and step size
-    itd = 200 #twoafc.start_itd
+    itd = twoafc.start_itd
     factor = twoafc.initial_step
     reversals = twoafc.reversals
     downup_reversals = twoafc.downup_reversals
