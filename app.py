@@ -206,10 +206,10 @@ train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bal
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Bald)
 train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
     training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
-#score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, 
-#    test_data=testData_Bald, criterion=RMSELoss)
-#score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
-#    test_data=testData_Random, criterion=RMSELoss)
+score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, 
+    test_data=testData_Bald, criterion=RMSELoss)
+score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
+    test_data=testData_Random, criterion=RMSELoss)
 
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
 pre_acquisition_model_state_Random = model_Random.state_dict()
