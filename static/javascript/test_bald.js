@@ -1,4 +1,4 @@
-const al_counter = 40;
+const al_counter = 25;
 
 var trials = 0;
 var Xtrain = [];

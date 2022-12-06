@@ -176,7 +176,7 @@ likelihood_Random = BernoulliLikelihood()
 # INITIALIZE ML PARAMETERS
 
 lr = 0.1
-training_iterations = 100 #50
+training_iterations = 50 #100
 
 # Use the adam optimizer
 optimizer_init_Bald = Adam(model_Bald.parameters(), lr=lr)
