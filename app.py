@@ -7,7 +7,7 @@ from torch.optim import Adam
 
 import gpytorch
 from gpytorch.models import ApproximateGP
-from gpytorch.variational import DeltaVariationalDistribution #CholeskyVariationalDistribution
+from gpytorch.variational import CholeskyVariationalDistribution
 from gpytorch.variational import VariationalStrategy
 from gpytorch.likelihoods import BernoulliLikelihood
 from gpytorch.mlls import VariationalELBO
@@ -65,7 +65,7 @@ def PF_test_function(x):
 
 class GPClassificationModel(ApproximateGP):
     def __init__(self, train_x):
-        variational_distribution = DeltaVariationalDistribution(train_x.size(0)) #CholeskyVariationalDistribution(train_x.size(0))
+        variational_distribution = CholeskyVariationalDistribution(train_x.size(0))
         variational_strategy = VariationalStrategy(self, train_x, 
             variational_distribution, learn_inducing_locations=True)
         super(GPClassificationModel, self).__init__(variational_strategy)
