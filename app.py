@@ -314,15 +314,16 @@ def test_bald():
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
             # print('rightmost', rightmost)
+            print('ITD queried', best_sample.item())
         else:
             rightmost = int(request.values.get('rightmost'))
             # print('rightmost', rightmost)
             if answer == rightmost:
                 label = torch.Tensor([1])
-                print('RIGHT! and name ' + name + surname)
+                print('RIGHT! ' + name + ' ' + surname)
             else:
                 label = torch.Tensor([0])
-                print('WRONG! and name' + name + surname)
+                print('WRONG! ' + name + ' ' + surname)
             labels.append(label.item())
             # move that data from the pool to the training set
             pool = move_s(best_sample, label, pool, traind)
@@ -422,16 +423,16 @@ def test_random():
         if answer == 0:
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
-            # print('rightmost', rightmost)
+            print('ITD queried', best_sample.item())
         else:
             rightmost = int(request.values.get('rightmost'))
             # print('rightmost', rightmost)
             if answer == rightmost:
                 label = torch.Tensor([1])
-                print('RIGHT! and name ' + name + surname)
+                print('RIGHT! ' + name + ' ' + surname)
             else:
                 label = torch.Tensor([0])
-                print('WRONG! and name  ' + name + surname)
+                print('WRONG! ' + name + ' ' + surname)
             labels.append(label.item())
             # move that data from the pool to the training set
             pool = move_s(best_sample, label, pool, traind)
@@ -535,16 +536,17 @@ def test_2afc():
         if answer == 0:
             queried.append(itd)
             rightmost, wavfile = stimulus.play(itd)
+            print('ITD queried', itd)
         else:
             rightmost = int(request.values.get('rightmost'))
             if answer == rightmost:
                 label = 1
                 correct_counter += 1
-                print('RIGHT! and name ' + name + surname)
+                print('RIGHT! ' + name + ' ' + surname)
             else:
                 label = 0
                 correct_counter = 0
-                print('WRONG! and name ' + name + surname)
+                print('WRONG! ' + name + ' ' + surname)
             # update counters and answers dictionary
             counter += 1
             #if correct_counter == 4:
