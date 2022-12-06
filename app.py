@@ -207,7 +207,7 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 5 # 40
+al_counter = 25 # 40
 twoafc_counter = 6 #6
 
 # INITIAL TRAINING
@@ -381,12 +381,13 @@ def test_bald():
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
             # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
+            seventies = testData_Bald.inputs[seventy_index]
             ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, 
                 color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
             print('testData_Bald.inputs[seventy_index]', testData_Bald.inputs[seventy_index])
-            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Bald.inputs[seventy_index].item()))
+            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
             #pngImage = io.BytesIO()
             #FigureCanvas(f).print_png(pngImage)
             #pngImageB64String = "data:image/png;base64,"
@@ -495,12 +496,12 @@ def test_random():
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
             # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
+            seventies = testData_Random.inputs[seventy_index]
             ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), 
                 alpha=0.5, color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
-            print('testData_Random.inputs[seventy_index]', testData_Random.inputs[seventy_index])
-            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(testData_Random.inputs[seventy_index].item()))
+            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
             print('test_data', testData_Random.inputs.numpy())
             print('observed_pred.mean', pred_prob.mean)
             print('saving image')
@@ -644,7 +645,6 @@ def test_2afc():
     return render_template('test_2afc.html')
 
 if __name__== '__main__':
-    #app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
     #Session(app)
     app.run(debug=True)
