@@ -155,7 +155,8 @@ for n, lowdelay in enumerate(y_train_1):
     if np.random.uniform(0, 1) <= GAMMA:
         y_train_1[n] = 1
 '''
-y_train_1 = (0.51 - 0.49) * torch.rand(5) + 0.49
+#y_train_1 = (0.51 - 0.49) * torch.rand(5) + 0.49
+y_train_1 = torch.Tensor([0] * 5)
 X_train_2 = torch.linspace(60, 100, 41)
 '''
 yTrain_2 = PF_test_function(X_train_2)
@@ -165,7 +166,7 @@ for n, highdelay in enumerate(y_train_2):
     if np.random.uniform(0, 1) <= DELTA:
         y_train_2[n] = 0
 '''
-y_train_2 = (0.99 - 0.95) * torch.rand(41) + 0.95
+#y_train_2 = (0.99 - 0.95) * torch.rand(41) + 0.95
 yTrain_2 = PF_test_function(X_train_2)
 yTrainmean_2 = torch.mean(yTrain_2)
 y_train_2 = torch.sign(yTrain_2 - yTrainmean_2).add(1).div(2)
