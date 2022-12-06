@@ -111,8 +111,8 @@ def test(model, likelihood, test_data, criterion):
         # print('RMSE SCORE: ', score)
     # endTest = time.time()
     # print('TEST TIME', endTest - startTest)
-    print('test_data', test_data.inputs)
-    print('observed_pred.mean', observed_pred.mean)
+    #print('test_data', test_data.inputs)
+    #print('observed_pred.mean', observed_pred.mean)
     return score.item(), observed_pred
 
 # SAVE AND LOAD INITIAL MODELS
@@ -310,6 +310,7 @@ def test_bald():
         best_sample = acquirer.select_samples(model_Bald, likelihood_Bald, pool)
         # print('ITD', best_sample.item())
         # print('answer', answer)
+        print('pool', pool)
         if answer == 0:
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
@@ -375,7 +376,7 @@ def test_bald():
             #session['imageBald'] = pngImageB64String
             print('test_data', testData_Bald.inputs.numpy())
             print('observed_pred.mean', pred_prob.mean)
-            print('saving image')
+            #print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
@@ -487,7 +488,7 @@ def test_random():
             'queries': queried, 'labels': labels}
     #if wavfile:
     #    os.remove(wavfile)
-    print('end 2afc')
+    #print('end 2afc')
     return render_template('test_random.html')
 
 
