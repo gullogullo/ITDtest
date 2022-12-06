@@ -146,20 +146,26 @@ def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
 
-X_train_1 = torch.linspace(1, 8, 8) # 10, 10)
+X_train_1 = torch.linspace(1, 5, 5) # 10, 10)
+'''
 yTrain_1 = PF_test_function(X_train_1)
 yTrainmean_1 = torch.mean(yTrain_1)
 y_train_1 = torch.sign(yTrain_1 - yTrainmean_1).add(1).div(2)
 for n, lowdelay in enumerate(y_train_1):
     if np.random.uniform(0, 1) <= GAMMA:
         y_train_1[n] = 1
+'''
+y_train_1 = torch.Tensor([0.5] *  5)
 X_train_2 = torch.linspace(60, 100, 41)
+'''
 yTrain_2 = PF_test_function(X_train_2)
 yTrainmean_2 = torch.mean(yTrain_2)
 y_train_2 = torch.sign(yTrain_2 - yTrainmean_2).add(1).div(2)
 for n, highdelay in enumerate(y_train_2):
     if np.random.uniform(0, 1) <= DELTA:
         y_train_2[n] = 0
+'''
+y_train_2 = (0.99 - 0.95) * torch.rand(41) + 0.95
 X_train_Bald = torch.cat((X_train_1, X_train_2))
 X_train_Random = torch.cat((X_train_1, X_train_2))
 y_train = torch.cat((y_train_1, y_train_2))
