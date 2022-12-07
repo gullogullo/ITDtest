@@ -17,6 +17,15 @@ const twoafcString = "_PF_WH_Approximation.png";
 
 var urls = [url2.concat(baldString), url2.concat(randomString), url2.concat(twoafcString)];
 
+const urlcsv = "static/csvs/";
+var urlcsv1 = urlcsv.concat(String(username));
+var urlcsv2 = urlcsv1.concat("_".concat(String(usersurname)));
+const baldCsvString = "_2afc_results.csv";
+const randomCsvString = "_bald_results.csv";
+const twoafcCsvString = "_random_results.csv";
+
+var urlsCsv = [urlcsv2.concat(baldCsvString), urlcsv2.concat(randomCsvString), urlcsv2.concat(twoafcCsvString)];
+
 if (bald == "true") {
   document.getElementById("baldPlot").setAttribute("src", url2.concat(baldString)); 
   document.getElementById("bald").style.display = "none";
@@ -42,15 +51,14 @@ else {
 };
 
 if (bald == "true" && random == "true" && twoafc == "true") {
-  if (confirm('Do you want to save the plots?')) {
-    var interval = setInterval(download, 300, urls);
-    //setTimeout(function() { redirect('/'); }, 5000);
-    //console.log('Plot saved');
+  if (confirm('Do you want to save the results?')) {
+    var interval = setInterval(download, 300, urlsCsv);
   } else {
     // Do nothing!
     //console.log('Plot not saved');
-    //setTimeout(function() { redirect('/'); }, 3000);
+    setTimeout(function() { redirect('/'); }, 300);
   };
+  setTimeout(function() { redirect('/'); }, 8000);
 };
 
 function redirect (url) {
@@ -74,7 +82,6 @@ function download(urls) {
   var url = urls.pop();
   var a = document.createElement('a');
   a.href = url;
-  //document.getElementById("demo").innerHTML = url.split('/').pop();
   a.download = url.split('/').pop();
   document.body.appendChild(a);
   a.click();

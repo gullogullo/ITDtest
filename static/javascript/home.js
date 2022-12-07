@@ -1,7 +1,7 @@
 document.getElementById("submitPhones").addEventListener("click", function(){
   localStorage.setItem("baldDone", false);
   localStorage.setItem("randomDone", false);
-  localStorage.setItem("2afcDone", false);
+  localStorage.setItem("twoafcDone", false);
   firstname = document.getElementById('firstname').value
   lastname = document.getElementById('lastname').value
   localStorage.setItem("name", firstname);

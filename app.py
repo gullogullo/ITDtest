@@ -1,6 +1,6 @@
 # IMPORTS
 
-from flask import Flask, request, session, render_template
+from flask import Flask, request, session, render_template, jsonify
 
 import torch
 from torch.optim import Adam
@@ -19,6 +19,7 @@ import time
 import os
 import errno
 import sys
+import csv
 
 sys.path.insert(0, os.getcwd() + '/modules')  
 from customDataset import CustomDataset as customDataset
@@ -70,7 +71,8 @@ class GPClassificationModel(ApproximateGP):
             variational_distribution, learn_inducing_locations=True)
         super(GPClassificationModel, self).__init__(variational_strategy)
         self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.LinearKernel()) #RBFKernel())
+        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.LinearKernel())
+        #self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -94,7 +96,6 @@ def train(model, likelihood, optimizer, training_iterations, train_data, mll):
         # print('Iter %d/%d - Loss: %.3f' % (i + 1, training_iterations, loss.item()))
         optimizer.step()
     endTrain = time.time()
-    # REMOVE
     #print('TRAIN TIME', endTrain - startTrain)
 
 def test(model, likelihood, test_data, criterion):
@@ -111,8 +112,6 @@ def test(model, likelihood, test_data, criterion):
         # print('RMSE SCORE: ', score)
     # endTest = time.time()
     # print('TEST TIME', endTest - startTest)
-    #print('test_data', test_data.inputs)
-    #print('observed_pred.mean', observed_pred.mean)
     return score.item(), observed_pred
 
 # SAVE AND LOAD INITIAL MODELS
@@ -146,7 +145,7 @@ def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
 
-X_train_1 = torch.linspace(1, 5, 5) # 10, 10)
+X_train_1 = torch.linspace(1, 6, 6) # 10, 10)
 '''
 yTrain_1 = PF_test_function(X_train_1)
 yTrainmean_1 = torch.mean(yTrain_1)
@@ -156,16 +155,8 @@ for n, lowdelay in enumerate(y_train_1):
         y_train_1[n] = 1
 '''
 #y_train_1 = (0.51 - 0.49) * torch.rand(5) + 0.49
-y_train_1 = torch.Tensor([0] * 5)
+y_train_1 = torch.Tensor([0, 1, 0, 1, 0, 1])
 X_train_2 = torch.linspace(60, 100, 41)
-'''
-yTrain_2 = PF_test_function(X_train_2)
-yTrainmean_2 = torch.mean(yTrain_2)
-y_train_2 = torch.sign(yTrain_2 - yTrainmean_2).add(1).div(2)
-for n, highdelay in enumerate(y_train_2):
-    if np.random.uniform(0, 1) <= DELTA:
-        y_train_2[n] = 0
-'''
 #y_train_2 = (0.99 - 0.95) * torch.rand(41) + 0.95
 yTrain_2 = PF_test_function(X_train_2)
 yTrainmean_2 = torch.mean(yTrain_2)
@@ -190,6 +181,21 @@ y_test = torch.sign(yTest - yTestmean).add(1).div(2)
 testData_Bald = customDataset(X_test, y_test)
 testData_Random = customDataset(X_test, y_test)
 
+# INITIALIZE POOL DATA
+X_pool = torch.linspace(1, 70, 70) #100, 100)
+yPool = PF_test_function(X_pool)
+yPoolmean = torch.mean(yPool)
+y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
+poolData_Bald = X_pool
+poolData_Random = X_pool
+
+test_scores_Bald = []
+queried_samples_Bald = []
+labels_Bald = []
+test_scores_Random = []
+queried_samples_Random = []
+labels_Random = []
+
 # INITIALIZE MODELS
 
 model_Bald = GPClassificationModel(X_train_Bald)
@@ -201,7 +207,7 @@ likelihood_Random = BernoulliLikelihood()
 # INITIALIZE ML PARAMETERS
 
 lr = 0.1
-training_iterations = 50 #100
+training_iterations = 100 #100
 
 # Use the adam optimizer
 optimizer_init_Bald = Adam(model_Bald.parameters(), lr=lr)
@@ -220,8 +226,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 25 # 40
-twoafc_counter = 6 #6
+al_counter = 2 # 25, 40
+twoafc_counter = 1 #6
 
 # INITIAL TRAINING
 
@@ -239,29 +245,12 @@ pre_acquisition_model_state_Random = model_Random.state_dict()
 pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
 pre_acquisition_ll_state_Random = likelihood_Random.state_dict()
 
-
-
-# INITIALIZE POOL DATA
-X_pool = torch.linspace(1, 70, 70) #100, 100)
-yPool = PF_test_function(X_pool)
-yPoolmean = torch.mean(yPool)
-y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
-poolData_Bald = X_pool
-poolData_Random = X_pool
-
-test_scores_Bald = []
-queried_samples_Bald = []
-labels_Bald = []
-test_scores_Random = []
-queried_samples_Random = []
-labels_Random = []
-
 PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
 PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
 PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
-saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+# saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
 
 @app.route('/', methods =["POST", "GET"])
 def index():
@@ -269,14 +258,14 @@ def index():
     surname = ""
     session['firstname'] = name
     session['surname'] = surname
+    session['done_Bald'] = False
+    session['done_2afc'] = False
+    session['done_Rand'] = False
     if request.method == "POST":
         name = str(request.values.get('name'))
         surname = str(request.values.get('lastname'))
         session['firstname'] = name
         session['surname'] = surname
-        # REMOVE
-    #print('firstname', session['firstname'])
-    #print('surname', surname)
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
@@ -296,10 +285,38 @@ def test_select():
     test_scores_Random = []
     labels_Random = []
     queried_samples_Random = []
-    #imgBald = session.get('imageBald', None)
-    # TODO CHECK WHERE TO LOAD INIT MODELS
-    loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-    return render_template('test_select.html') #, imgBald = imgBald)
+    name = str(session.get('firstname', None))
+    surname = str(session.get('surname', None))
+    queried_Bald = session.get('queried_Bald', None)
+    labels_Baldd = session.get('labels_Bald', None)
+    test_data_Bald = session.get('test_data_Bald', None)
+    pred_Bald = session.get('pred_Bald', None)
+    queried_Rand = session.get('queried_Rand', None)
+    labels_Rand = session.get('labels_Rand', None)
+    test_data_Rand = session.get('test_data_Rand', None)
+    pred_Rand = session.get('pred_Rand', None)
+    queried_2afc = session.get('queried_2afc', None)
+    labels_2afc = session.get('labels_2afc', None)
+    test_data_2afc = session.get('test_data_2afc', None)
+    pred_2afc = session.get('pred_2afc', None)
+    afc_dict = {'itds': queried_2afc, 'labels': labels_2afc, 'test': test_data_2afc, 'pred': pred_2afc}
+    bald_dict = {'itds': queried_Bald, 'labels': labels_Baldd, 'test': test_data_Bald, 'pred': pred_Bald} 
+    rand_dict = {'itds': queried_Rand, 'labels': labels_Rand, 'test': test_data_Rand, 'pred': pred_Rand}
+    # TODO CHECK IF/WHEN LOAD INIT MODELS
+    # loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+    data = [afc_dict, bald_dict, rand_dict]
+    csvString = ['2afc', 'bald', 'random']
+    done_Bald = session.get('done_Bald', None)
+    done_Rand = session.get('done_Rand', None)
+    done_2afc = session.get('done_2afc', None)
+    if done_2afc and done_Bald and done_Rand:
+        for n, d in enumerate(data):
+            csvname = 'static/csvs/' + name + '_' + surname + '_' + csvString[n] + '_results.csv'
+            with open(csvname, 'w') as output_file:
+                dict_writer = csv.writer(output_file)
+                for key, value in d.items():
+                    dict_writer.writerow([key, value])
+    return render_template('test_select.html')
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
@@ -323,7 +340,6 @@ def test_bald():
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
-        #play = int(request.values.get('ajaxPlay'))
         if request.values.getlist('poolData_Bald'):
             # RECEIVE AND BUILD TRAIN DATA
             X_traind = torch.Tensor(list(map(float, request.values.getlist('X_train_Bald'))))
@@ -337,16 +353,12 @@ def test_bald():
             labels = list(map(float, request.values.getlist('labels_Bald')))
         acquirer = BALD(pool.numel())
         best_sample = acquirer.select_samples(model_Bald, likelihood_Bald, pool)
-        # print('ITD', best_sample.item())
-        # print('answer', answer)
         if answer == 0:
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
-            # print('rightmost', rightmost)
             print('ITD queried', best_sample.item())
         else:
             rightmost = int(request.values.get('rightmost'))
-            # print('rightmost', rightmost)
             if answer == rightmost:
                 label = torch.Tensor([1])
                 print('RIGHT! ' + name + ' ' + surname)
@@ -356,28 +368,20 @@ def test_bald():
             labels.append(label.item())
             # move that data from the pool to the training set
             pool = move_s(best_sample, label, pool, traind)
-
-            #remodel_Bald = GPClassificationModel(traind.inputs)
-
             # init the optimizer
             optimizer_Bald = Adam(model_Bald.parameters(), lr=lr)
-
             # init the marginal likelihood
             mll_Bald = VariationalELBO(likelihood=likelihood_Bald, 
                 model=model_Bald, num_data=traind.inputs.numel())
-            
             # re-train the model
             train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_Bald, 
                 training_iterations=training_iterations, train_data=traind, mll=mll_Bald)
-                
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             score, pred_prob = test(model=model_Bald, likelihood=likelihood_Bald,
                 test_data=testData_Bald, criterion=RMSELoss)
             scores.append(score)
             #print('score', score)
-        print('queried', queried)
-        print('labels', labels)
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -399,25 +403,24 @@ def test_bald():
                 color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
-            print('testData_Bald.inputs[seventy_index]', testData_Bald.inputs[seventy_index])
-            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
-            #pngImage = io.BytesIO()
-            #FigureCanvas(f).print_png(pngImage)
-            #pngImageB64String = "data:image/png;base64,"
-            #pngImageB64String += base64.b64encode(pngImage.getvalue()).decode('utf8')
-            #session['imageBald'] = pngImageB64String
-            print('test_data', testData_Bald.inputs.numpy())
-            print('observed_pred.mean', pred_prob.mean)
-            #print('saving image')
+            #print('testData_Bald.inputs[seventy_index]', testData_Bald.inputs[seventy_index])
+            ax.set_title('BALD' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
+            session['queried_Bald'] = queried
+            session['labels_Bald'] = labels
+            session['test_data_Bald'] = testData_Bald.inputs.tolist()
+            session['pred_Bald'] = pred_prob.mean.tolist()
+            #print('queried', queried)
+            #print('labels', labels)
+            #print('test_data', testData_Bald.inputs.numpy())
+            #print('observed_pred.mean', pred_prob.mean)
+            print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
-        #print('pool', pool)
+            session['done_Bald'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
-    #if wavfile:
-    #    os.remove(wavfile)
     return render_template('test_bald.html')
 
 
@@ -442,7 +445,6 @@ def test_random():
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
-        #play = int(request.values.get('ajaxPlay'))
         if request.values.getlist('queried_samples_Random'):
             # RECEIVE AND BUILD TRAIN DATA
             X_traind = torch.Tensor(list(map(float, request.values.getlist('X_train_Random'))))
@@ -456,8 +458,6 @@ def test_random():
             labels = list(map(float, request.values.getlist('labels_Random')))
         acquirer = Random(pool.numel())
         best_sample = acquirer.select_samples(model_Random, likelihood_Random, pool)
-        # print('ITD', best_sample.item())
-        # print('answer', answer)
         if answer == 0:
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
@@ -474,25 +474,19 @@ def test_random():
             labels.append(label.item())
             # move that data from the pool to the training set
             pool = move_s(best_sample, label, pool, traind)
-
             # init the optimizer
             optimizer_Random = Adam(model_Random.parameters(), lr=lr)
-
             # init the marginal likelihood
             mll_Random = VariationalELBO(likelihood=likelihood_Random, 
                 model=model_Random, num_data=traind.inputs.numel())
-            
             # re-train the model
             train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_Random, 
                 training_iterations=training_iterations, train_data=traind, mll=mll_Random)
-                
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             score, pred_prob = test(model=model_Random, likelihood=likelihood_Random,
                 test_data=testData_Random, criterion=RMSELoss)
             test_scores_Random.append(score)
-        # print('queried', queried)
-        # print('labels', labels)
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -514,19 +508,23 @@ def test_random():
                 alpha=0.5, color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
-            ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
-            print('test_data', testData_Random.inputs.numpy())
-            print('observed_pred.mean', pred_prob.mean)
+            ax.set_title('Random' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
+            session['queried_Rand'] = queried
+            session['labels_Rand'] = labels
+            session['test_data_Rand'] = testData_Bald.inputs.tolist()
+            session['pred_Rand'] = pred_prob.mean.tolist()
+            #print('queried', queried)
+            #print('labels', labels)
+            #print('test_data', testData_Random.inputs.numpy())
+            #print('observed_pred.mean', pred_prob.mean)
             print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
             plt.close(f)
+            session['done_Rand'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
-    #if wavfile:
-    #    os.remove(wavfile)
-    #print('end 2afc')
     return render_template('test_random.html')
 
 
@@ -557,7 +555,6 @@ def test_2afc():
         answer = int(request.values.get('answer'))
         # play = int(request.values.get('ajaxPlay'))
         if request.values.getlist('queried_samples'):
-            # COMPUTE EVERYTHING
             counter = int(request.values.get('counter'))
             itd = float(request.values.get('itd'))
             factor = float(request.values.get('factor'))
@@ -568,10 +565,6 @@ def test_2afc():
             downup_reversals = int(request.values.get('downup_reversals'))
             queried = list(map(float, request.values.getlist('queried_samples')))
             labels = list(map(float, request.values.getlist('labels')))
-        # print('ITD', itd)
-        # print('answer', answer)
-        # print('TOTAL REVERSALS', reversals)
-        # print('DOWNUP REVERSALS', downup_reversals)
         if answer == 0:
             queried.append(itd)
             rightmost, wavfile = stimulus.play(itd)
@@ -588,9 +581,6 @@ def test_2afc():
                 print('WRONG! ' + name + ' ' + surname)
             # update counters and answers dictionary
             counter += 1
-            #if correct_counter == 4:
-            #    correct_counter = 0
-            # queried.append(itd)
             labels.append(label)
             # first two tests: wrong -> up, right -> same
             # WHY!?!?
@@ -628,8 +618,6 @@ def test_2afc():
             # count reversals only after the minimum step size
             if downup_reversals < 2:
                 reversals = 0
-        # print('counter', counter)
-        # print('rightmost', rightmost)
         if reversals == twoafc_counter: #twoafc.total_reversals:
             itds = np.asarray(queried)
             labels_array = np.asarray(labels)
@@ -641,20 +629,22 @@ def test_2afc():
             predictions = pc.predict(unique_itds)
             seventynine_percent = min(predictions, key= lambda x: abs(x - 0.794))
             seventy_index = (predictions == seventynine_percent).nonzero()[0].item()
-            print('test_data', testData_Bald.inputs.numpy())
-            print('observed_pred.mean', pc.predict(testData_Bald.inputs.numpy()))
+            session['queried_2afc'] = queried
+            session['labels_2afc'] = labels
+            session['test_data_2afc'] = testData_Bald.inputs.tolist()
+            session['pred_2afc'] = pc.predict(testData_Bald.inputs.numpy()).tolist()
+            #print('queried', queried)
+            #print('labels', labels)
+            #print('test_data', testData_Bald.inputs.numpy())
+            #print('observed_pred.mean', pc.predict(testData_Bald.inputs.numpy()))
             print('saving image')
             pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
-            # print(pc.score(itds_sorted, labels_sorted))
-            # print(pc.coefs_)
-            # print('79.4% point PF curve: ', unique_itds[seventy_index].item())
+            session['done_2afc'] = True
         return {'wav_location': wavfile, 'itd': itd, 'factor': factor,
             'counter': counter, 'correct_counter': correct_counter, 
             'upsized': upsized, 'downsized': downsized, 'rightmost': rightmost,
             'reversals': reversals, 'downup_reversals': downup_reversals, 
             'queries': queried, 'labels': labels}
-    #if wavfile:
-    #    os.remove(wavfile)
     return render_template('test_2afc.html')
 
 if __name__== '__main__':
