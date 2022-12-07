@@ -56,7 +56,7 @@ if (bald == "true" && random == "true" && twoafc == "true") {
   } else {
     // Do nothing!
     //console.log('Plot not saved');
-    setTimeout(function() { redirect('/'); }, 300);
+    //setTimeout(function() { redirect('/'); }, 300);
   };
   setTimeout(function() { redirect('/'); }, 8000);
 };

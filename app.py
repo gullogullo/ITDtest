@@ -1,6 +1,6 @@
 # IMPORTS
 
-from flask import Flask, request, session, render_template, jsonify
+from flask import Flask, request, session, render_template
 
 import torch
 from torch.optim import Adam
@@ -226,8 +226,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 2 # 25, 40
-twoafc_counter = 1 #6
+al_counter = 25 # 25, 40
+twoafc_counter = 6 #6
 
 # INITIAL TRAINING
 
