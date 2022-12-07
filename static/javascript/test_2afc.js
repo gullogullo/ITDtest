@@ -1,4 +1,4 @@
-const totalReverals = 6;
+const totalReversals = 1; //6;
 
 var itd = 0;
 var factor = 0;
@@ -30,6 +30,9 @@ document.addEventListener("click", e => {
   }, 1000);
 }, true);
 
+var loader = document.getElementById("loader");
+loader.style.display = "none";
+
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
 
@@ -41,6 +44,10 @@ button1.addEventListener("click", toggleBtn1);
 
 const button2 = document.getElementById("btn2");
 button2.addEventListener("click", toggleBtn2);
+
+let circularProgress = document.querySelector(".circular-progress");
+let progressStartValue = 10;
+let progressEndValue = 100;
 
 function toggleClass() {
   $.ajax({
@@ -116,7 +123,12 @@ function toggleBtn1() {
         //console.log(error);
     }
   }).done(function(data) {
-    if (data.reversals >= totalReverals) {
+    var progress = (progressStartValue + (data.reversals / totalReversals) * (progressEndValue - progressStartValue)) * 3.6;
+    //$('#demo').text(JSON.stringify(String(data.reversals).concat(String(progress)))).show();
+    circularProgress.style.background = `conic-gradient(transparent ${progress
+      }deg, #E74C3C 0deg)`;
+    if (data.reversals >= totalReversals) {
+      loader.style.display = "block";
       localStorage.setItem("twoafcDone", "true");
       redirect('/test_select');
     }
@@ -140,7 +152,6 @@ function toggleBtn1() {
     }
   });
 }
-
 
 function toggleBtn2() {
   $.ajax({
@@ -168,8 +179,11 @@ function toggleBtn2() {
         //console.log(error);
     }
   }).done(function(data) {
-    //$('#demo').text(JSON.stringify(data)).show();
-    if (data.reversals >= totalReverals) {
+    var progress = (progressStartValue + (data.reversals / totalReversals) * (progressEndValue - progressStartValue)) * 3.6;
+    //$('#demo').text(JSON.stringify(String(data.reversals).concat(String(progress)))).show();
+    circularProgress.style.background = `conic-gradient(transparent ${progress
+      }deg, #E74C3C 0deg)`;
+    if (data.reversals >= totalReversals) {
       localStorage.setItem("twoafcDone", "true");
       redirect('/test_select');
     }

@@ -43,6 +43,7 @@ plt.switch_backend('Agg')
 # REMOVE FILES
 def silentremove(filename):
     try:
+        print('deleting ' + filename)
         os.remove(filename)
     except OSError as e: # this would be "except OSError, e:" before Python 2.6
         if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
@@ -269,6 +270,9 @@ def index():
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
     silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
+    silentremove('static/csvs/' + name + '_' + surname + '_2afc_results.csv')
+    silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
+    silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
     return render_template("index.html")
 
 @app.route('/test_select')
@@ -336,6 +340,9 @@ def test_bald():
     labels = labels_Bald
     scores = test_scores_Bald
     traind = trainData_Bald
+    train_data_new = trainData_Bald
+    global model_Bald
+    global likelihood_Bald
     if request.method == "POST":
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
@@ -358,6 +365,8 @@ def test_bald():
             rightmost, wavfile = stimulus.play(best_sample)
             print('ITD queried', best_sample.item())
         else:
+            print('traind before', traind.inputs)
+            print('traind before', traind.labels)
             rightmost = int(request.values.get('rightmost'))
             if answer == rightmost:
                 label = torch.Tensor([1])
@@ -367,21 +376,50 @@ def test_bald():
                 print('WRONG! ' + name + ' ' + surname)
             labels.append(label.item())
             # move that data from the pool to the training set
-            pool = move_s(best_sample, label, pool, traind)
+            pool, train_data_new = move_s(best_sample, label, pool, traind)
             # init the optimizer
             optimizer_Bald = Adam(model_Bald.parameters(), lr=lr)
             # init the marginal likelihood
             mll_Bald = VariationalELBO(likelihood=likelihood_Bald, 
-                model=model_Bald, num_data=traind.inputs.numel())
+                model=model_Bald, num_data=train_data_new.inputs.numel())
             # re-train the model
             train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_Bald, 
-                training_iterations=training_iterations, train_data=traind, mll=mll_Bald)
+                training_iterations=training_iterations, train_data=train_data_new, mll=mll_Bald)
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             score, pred_prob = test(model=model_Bald, likelihood=likelihood_Bald,
                 test_data=testData_Bald, criterion=RMSELoss)
             scores.append(score)
             #print('score', score)
+
+            '''
+            max_var, ind = torch.max(pred_prob.variance, 0)
+            # print('MAX Variance', max_var)
+            f, ax = plt.subplots(1, 1)
+            ax.tick_params(left = False)
+            ax.set_ylim(-0.3, 1.3)
+            ax.scatter(init_trainData_Bald.inputs.reshape(-1, 1).numpy(), init_trainData_Bald.labels.numpy(),  marker='*')
+            ax.scatter(queried, labels,  marker='*', color='b')
+            # ax.plot(testData.inputs.numpy(), testData.labels.numpy(), 'b')
+            ax.plot(testData_Bald.inputs.numpy(), pred_prob.mean, 'r')
+            double_std = torch.sqrt(pred_prob.variance)
+            lower = pred_prob.mean - double_std
+            upper = pred_prob.mean + double_std
+            seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
+            seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
+            seventies = testData_Bald.inputs[seventy_index]
+            ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, color='r')
+            ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
+            ax.set_xlabel('ITD')
+            # ax.set_ylabel('Probability')
+            # ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting')
+            ax.axvline(best_sample.item(), 0, 1)
+            ax.set_title('BALD' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()) + r'$\mu$s')
+            plt.savefig('static/figures/PF_' + f'{acquirer.__class__.__name__}' + '_Approximation_' + str(trials) + '.png')
+            plt.close(f)
+            '''
+
+
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -418,7 +456,7 @@ def test_bald():
             plt.close(f)
             session['done_Bald'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
-            'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
+            'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
     return render_template('test_bald.html')
@@ -441,6 +479,9 @@ def test_random():
     labels = labels_Random
     scores = test_scores_Random
     traind = trainData_Random
+    train_data_new = trainData_Random
+    global model_Random
+    global likelihood_Random
     if request.method == "POST":
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
@@ -473,20 +514,51 @@ def test_random():
                 print('WRONG! ' + name + ' ' + surname)
             labels.append(label.item())
             # move that data from the pool to the training set
-            pool = move_s(best_sample, label, pool, traind)
+            pool, train_data_new = move_s(best_sample, label, pool, traind)
             # init the optimizer
             optimizer_Random = Adam(model_Random.parameters(), lr=lr)
             # init the marginal likelihood
             mll_Random = VariationalELBO(likelihood=likelihood_Random, 
-                model=model_Random, num_data=traind.inputs.numel())
+                model=model_Random, num_data=train_data_new.inputs.numel())
             # re-train the model
             train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_Random, 
-                training_iterations=training_iterations, train_data=traind, mll=mll_Random)
+                training_iterations=training_iterations, train_data=train_data_new, mll=mll_Random)
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             score, pred_prob = test(model=model_Random, likelihood=likelihood_Random,
                 test_data=testData_Random, criterion=RMSELoss)
             test_scores_Random.append(score)
+
+
+            '''
+            max_var, ind = torch.max(pred_prob.variance, 0)
+            # print('MAX Variance', max_var)
+            f, ax = plt.subplots(1, 1)
+            ax.tick_params(left = False)
+            ax.set_ylim(-0.3, 1.3)
+            ax.scatter(init_trainData_Random.inputs.reshape(-1, 1).numpy(), init_trainData_Random.labels.numpy(),  marker='*')
+            ax.scatter(queried, labels,  marker='*', color='b')
+            # ax.plot(testData.inputs.numpy(), testData.labels.numpy(), 'b')
+            ax.plot(testData_Random.inputs.numpy(), pred_prob.mean, 'r')
+            double_std = torch.sqrt(pred_prob.variance)
+            lower = pred_prob.mean - double_std
+            upper = pred_prob.mean + double_std
+            seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
+            seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
+            seventies = testData_Random.inputs[seventy_index]
+            ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, color='r')
+            ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
+            ax.set_xlabel('ITD')
+            # ax.set_ylabel('Probability')
+            # ax.set_title(f'{acquirer.__class__.__name__}' + ' PF Fitting')
+            ax.axvline(best_sample.item(), 0, 1)
+            ax.set_title('Random' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()) + r'$\mu$s')
+            plt.savefig('static/figures/PF_' + f'{acquirer.__class__.__name__}' + '_Approximation_' + str(trials) + '.png')
+            plt.close(f)
+            '''
+            
+
+
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -522,7 +594,7 @@ def test_random():
             plt.close(f)
             session['done_Rand'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
-            'Xtrain': traind.inputs.tolist(), 'ytrain': traind.labels.tolist(), 
+            'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
     return render_template('test_random.html')
@@ -532,6 +604,10 @@ def test_random():
 def test_2afc():
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
+    if name == 'None':
+        name = ''
+    if surname == 'None':
+        surname = ''
     answer = 0
     wavfile = None
     queried = []

@@ -54,7 +54,7 @@ def move_s(sample, label, from_set, to_set):
     if len(index) > 1:
         index = index[0]
     to_set.labels = torch.cat([to_set.labels[:index], label, to_set.labels[index:]])
-    return from_set
+    return from_set, to_set
 
 
 def move_sample(sample, label, from_set, to_set):

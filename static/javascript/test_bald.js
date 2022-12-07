@@ -1,4 +1,4 @@
-const al_counter = 25;
+const al_counter = 5; //25;
 
 var trials = 0;
 var Xtrain = [];
@@ -28,6 +28,9 @@ document.addEventListener("click", e => {
   }, 1000);
 }, true);
 
+var loader = document.getElementById("loader");
+loader.style.display = "none";
+
 const button = document.getElementById("playDown");
 button.addEventListener("click", toggleClass);
 
@@ -39,6 +42,10 @@ button1.addEventListener("click", toggleBtn1);
 
 const button2 = document.getElementById("btn2");
 button2.addEventListener("click", toggleBtn2);
+
+let circularProgress = document.querySelector(".circular-progress");
+let progressStartValue = 10;
+let progressEndValue = 100;
 
 function toggleClass() {
   $.ajax({
@@ -85,6 +92,7 @@ function toggleClass() {
 };
 
 function toggleBtn1() {
+  loader.style.display = "block";
   trials += 1;
   $.ajax({
     url: '/test_bald',
@@ -108,7 +116,10 @@ function toggleBtn1() {
         //console.log(error);
     }
   }).done(function(data) {
-    //$('#demo').text(JSON.stringify(data)).show();
+    var progress = (progressStartValue + (trials / al_counter) * (progressEndValue - progressStartValue)) * 3.6;
+    //$('#demo').text(JSON.stringify(String(data.reversals).concat(String(progress)))).show();
+    circularProgress.style.background = `conic-gradient(transparent ${progress
+      }deg, #E74C3C 0deg)`;
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
@@ -129,11 +140,13 @@ function toggleBtn1() {
       document.getElementById("btn1").classList.toggle("comeDown");
       document.getElementById("btn2").classList.toggle("goDown");
       document.getElementById("btn2").classList.toggle("comeUp");
+      loader.style.display = "none";
     }
   });
 };
 
 function toggleBtn2() {
+  loader.style.display = "block";
   trials += 1;
   $.ajax({
     url: '/test_bald',
@@ -157,7 +170,10 @@ function toggleBtn2() {
         //console.log(error);
     }
   }).done(function(data) {
-    //$('#demo').text(JSON.stringify(data)).show();
+    var progress = (progressStartValue + (trials / al_counter) * (progressEndValue - progressStartValue)) * 3.6;
+    //$('#demo').text(JSON.stringify(String(data.reversals).concat(String(progress)))).show();
+    circularProgress.style.background = `conic-gradient(transparent ${progress
+      }deg, #E74C3C 0deg)`;
     if (trials == al_counter) {
       localStorage.setItem("baldDone", "true");
       redirect('/test_select');
@@ -178,6 +194,7 @@ function toggleBtn2() {
       document.getElementById("btn1").classList.toggle("comeDown");
       document.getElementById("btn2").classList.toggle("goDown");
       document.getElementById("btn2").classList.toggle("comeUp");
+      loader.style.display = "none";
     }
   });
 };

@@ -9,7 +9,6 @@ from scipy import stats
 import numpy as np
 import torch
 import torchaudio
-#import sounddevice as sd
 import random
 
 
@@ -17,7 +16,7 @@ class Stimulus:
     """ Base class for sound stimulus
     """
     def __init__(self, sample_rate_in=10000000, sample_rate_out=48000, sensitivity=117.53,
-        Vat0dBFS=0.9163, length_in_seconds=0.5, interstimulus=0.05, sample_width=24,
+        Vat0dBFS=0.9163, length_in_seconds=0.5, interstimulus=0.2, sample_width=24,
         dB_SPL=70, lowcut=20, highcut=1400):
         """
         Noise synthesis:
