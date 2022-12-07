@@ -365,8 +365,6 @@ def test_bald():
             rightmost, wavfile = stimulus.play(best_sample)
             print('ITD queried', best_sample.item())
         else:
-            print('traind before', traind.inputs)
-            print('traind before', traind.labels)
             rightmost = int(request.values.get('rightmost'))
             if answer == rightmost:
                 label = torch.Tensor([1])
