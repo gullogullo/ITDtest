@@ -583,7 +583,7 @@ def test_random():
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             # score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
-            _, pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
+            pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
                 test_data=testData_Bald, criterion=RMSELoss)
             #test_scores_Random.append(score)
             '''
