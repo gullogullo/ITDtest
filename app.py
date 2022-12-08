@@ -505,10 +505,10 @@ def test_bald():
             #session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
             session['done_Bald'] = True
-            del globals()[model_Bald]
-            del globals()[likelihood_Bald]
-            del globals()[optimizer_Bald]
-            del globals()[mll_Bald]
+            del model_Bald
+            del likelihood_Bald
+            del optimizer_Bald
+            del mll_Bald
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,
@@ -651,10 +651,10 @@ def test_random():
             # session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
             session['done_Rand'] = True
-            del globals()[model_Random]
-            del globals()[likelihood_Random]
-            del globals()[optimizer_Random]
-            del globals()[mll_Random]
+            del model_Random
+            del likelihood_Random
+            del optimizer_Random
+            del mll_Random
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,
