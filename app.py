@@ -12,7 +12,7 @@ from gpytorch.variational import VariationalStrategy
 from gpytorch.likelihoods import BernoulliLikelihood
 from gpytorch.mlls import VariationalELBO
 
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 import numpy as np
 import secrets
 # import time
@@ -36,7 +36,8 @@ secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
 torch.set_flush_denormal(True)
-plt.switch_backend('Agg')
+
+# plt.switch_backend('Agg')
 
 # CLASSES AND METHODS
 
@@ -234,8 +235,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 25 # 25, 40
-twoafc_counter = 6 #6
+al_counter = 2 # 20, 25, 40
+twoafc_counter = 1 #6
 
 # INITIAL TRAINING
 
@@ -279,12 +280,12 @@ def index():
         surname = str(request.values.get('lastname'))
         session['firstname'] = name
         session['surname'] = surname
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
-    silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
-    silentremove('static/csvs/' + name + '_' + surname + '_2afc_results.csv')
-    silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
-    silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
+    #silentremove('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
+    silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
+    #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
+    #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
     return render_template("index.html")
 
 @app.route('/test_select')
@@ -315,9 +316,9 @@ def test_select():
     labels_2afc = session.get('labels_2afc', None)
     test_data_2afc = session.get('test_data_2afc', None)
     pred_2afc = session.get('pred_2afc', None)
-    afc_dict = {'itds': queried_2afc, 'labels': labels_2afc, 'test': test_data_2afc, 'pred': pred_2afc}
-    bald_dict = {'itds': queried_Bald, 'labels': labels_Baldd, 'test': test_data_Bald, 'pred': pred_Bald} 
-    rand_dict = {'itds': queried_Rand, 'labels': labels_Rand, 'test': test_data_Rand, 'pred': pred_Rand}
+    afc_dict = {'type': '2I-2AFC', 'itds': queried_2afc, 'labels': labels_2afc, 'test': test_data_2afc, 'pred': pred_2afc}
+    bald_dict = {'type': 'AL-BALD', 'itds': queried_Bald, 'labels': labels_Baldd, 'test': test_data_Bald, 'pred': pred_Bald} 
+    rand_dict = {'type': 'AL-RANDOM', 'itds': queried_Rand, 'labels': labels_Rand, 'test': test_data_Rand, 'pred': pred_Rand}
     # TODO CHECK IF/WHEN LOAD INIT MODELS
     # loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
     data = [afc_dict, bald_dict, rand_dict]
@@ -325,14 +326,31 @@ def test_select():
     done_Bald = session.get('done_Bald', None)
     done_Rand = session.get('done_Rand', None)
     done_2afc = session.get('done_2afc', None)
+    threshold_Bald = session.get('threshold_Bald')
+    threshold_Rand = session.get('threshold_Rand')
+    threshold_2afc = session.get('threshold_2afc')
+    if threshold_Bald:
+        threshold_Bald = int(threshold_Bald)
+    if threshold_Rand:
+        threshold_Rand = int(threshold_Rand)
+    if threshold_2afc:
+        threshold_2afc = int(threshold_2afc)
     if done_2afc and done_Bald and done_Rand:
+        '''
         for n, d in enumerate(data):
             csvname = 'static/csvs/' + name + '_' + surname + '_' + csvString[n] + '_results.csv'
             with open(csvname, 'w') as output_file:
                 dict_writer = csv.writer(output_file)
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
-    return render_template('test_select.html')
+        '''
+        csvname = 'static/csvs/' + name + '_' + surname + '_results.csv'
+        with open(csvname, 'w') as output_file:
+            dict_writer = csv.writer(output_file)
+            for d in data:
+                for key, value in d.items():
+                    dict_writer.writerow([key, value])
+    return render_template('test_select.html', threshold_Bald=threshold_Bald, threshold_Rand=threshold_Rand, threshold_2afc=threshold_2afc)
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
@@ -431,6 +449,7 @@ def test_bald():
 
         if trials == al_counter:
             # Plot the PF curve
+            '''
             f, ax = plt.subplots(1, 1)
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
@@ -444,25 +463,24 @@ def test_bald():
             max_var, ind = torch.max(pred_prob.variance, 0)
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
-            # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
             seventies = testData_Bald.inputs[seventy_index]
+            # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
             ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, 
                 color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Bald.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
-            #print('testData_Bald.inputs[seventy_index]', testData_Bald.inputs[seventy_index])
             ax.set_title('BALD' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
+            plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
+            plt.close(f)
+            '''
+            seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
+            seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
+            seventies = testData_Bald.inputs[seventy_index]
+            session['threshold_Bald'] = seventies[0].item()
             session['queried_Bald'] = queried
             session['labels_Bald'] = labels
             session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
-            #print('queried', queried)
-            #print('labels', labels)
-            #print('test_data', testData_Bald.inputs.numpy())
-            #print('observed_pred.mean', pred_prob.mean)
-            # print('saving image')
-            plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
-            plt.close(f)
             session['done_Bald'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
@@ -571,6 +589,7 @@ def test_random():
             
         if trials == al_counter:
             # Plot the PF curve
+            '''
             f, ax = plt.subplots(1, 1)
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
@@ -594,17 +613,17 @@ def test_random():
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
             ax.set_title('Random' + ' PF Fitting: 79.4% at {:.0f}'.format(seventies[0].item()))
+            plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
+            plt.close(f)
+            '''
+            seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
+            seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
+            seventies = testData_Bald.inputs[seventy_index]
+            session['threshold_Rand'] = seventies[0].item()
             session['queried_Rand'] = queried
             session['labels_Rand'] = labels
             session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
-            #print('queried', queried)
-            #print('labels', labels)
-            #print('test_data', testData_Random.inputs.numpy())
-            #print('observed_pred.mean', pred_prob.mean)
-            # print('saving image')
-            plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
-            plt.close(f)
             session['done_Rand'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
@@ -718,16 +737,12 @@ def test_2afc():
             predictions = pc.predict(unique_itds)
             seventynine_percent = min(predictions, key= lambda x: abs(x - 0.794))
             seventy_index = (predictions == seventynine_percent).nonzero()[0].item()
+            # pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
+            session['threshold_2afc'] = unique_itds[seventy_index].item()
             session['queried_2afc'] = queried
             session['labels_2afc'] = labels
             session['test_data_2afc'] = testData_Bald.inputs.tolist()
             session['pred_2afc'] = pc.predict(testData_Bald.inputs.numpy()).tolist()
-            #print('queried', queried)
-            #print('labels', labels)
-            #print('test_data', testData_Bald.inputs.numpy())
-            #print('observed_pred.mean', pc.predict(testData_Bald.inputs.numpy()))
-            # print('saving image')
-            pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
             session['done_2afc'] = True
         return {'wav_location': wavfile, 'itd': itd, 'factor': factor,
             'counter': counter, 'correct_counter': correct_counter, 

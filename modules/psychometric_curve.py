@@ -1,6 +1,6 @@
 from typing import Tuple, Union, Dict, Callable
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 from sklearn.base import BaseEstimator, RegressorMixin
@@ -100,6 +100,7 @@ class PsychometricCurve(BaseEstimator, RegressorMixin):
     def predict(self, x: np.array) -> np.ndarray:
         return self._fit_func(x, **self.coefs_)
 
+    '''
     def plot(self, x: np.array, y: np.ndarray, name, surname, seventynine) -> None:
         fig, ax = plt.subplots(1, 1)
 
@@ -115,6 +116,7 @@ class PsychometricCurve(BaseEstimator, RegressorMixin):
         plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_WH_Approximation.png')
         plt.close(fig)
         # return fig
+    '''
 
 
 if __name__ == "__main__":

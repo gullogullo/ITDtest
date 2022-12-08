@@ -8,26 +8,28 @@ twoafc = localStorage.getItem("twoafcDone");
 username = localStorage.getItem("name");
 usersurname = localStorage.getItem("lastname");
 
+/*
 const urlstatic = "static/figures/";
 var url1 = urlstatic.concat(String(username));
 var url2 = url1.concat("_".concat(String(usersurname)));
 const baldString = "_PF_BALD_Approximation.png";
 const randomString = "_PF_Random_Approximation.png";
 const twoafcString = "_PF_WH_Approximation.png";
-
 var urls = [url2.concat(baldString), url2.concat(randomString), url2.concat(twoafcString)];
+*/
 
 const urlcsv = "static/csvs/";
 var urlcsv1 = urlcsv.concat(String(username));
 var urlcsv2 = urlcsv1.concat("_".concat(String(usersurname)));
-const baldCsvString = "_2afc_results.csv";
-const randomCsvString = "_bald_results.csv";
-const twoafcCsvString = "_random_results.csv";
-
-var urlsCsv = [urlcsv2.concat(baldCsvString), urlcsv2.concat(randomCsvString), urlcsv2.concat(twoafcCsvString)];
+//const baldCsvString = "_2afc_results.csv";
+//const randomCsvString = "_bald_results.csv";
+//const twoafcCsvString = "_random_results.csv";
+//var urlsCsv = [urlcsv2.concat(baldCsvString), urlcsv2.concat(randomCsvString), urlcsv2.concat(twoafcCsvString)];
+var urlsCsv = [urlcsv2.concat("_results.csv")]
 
 if (bald == "true") {
-  document.getElementById("baldPlot").setAttribute("src", url2.concat(baldString)); 
+  //document.getElementById("baldPlot").setAttribute("src", url2.concat(baldString)); 
+  document.getElementById("baldPlot").style.display = "block";
   document.getElementById("bald").style.display = "none";
 }
 else {
@@ -35,7 +37,8 @@ else {
 };
 
 if (random == "true") {
-  document.getElementById("randomPlot").setAttribute("src", url2.concat(randomString)); 
+  //document.getElementById("randomPlot").setAttribute("src", url2.concat(randomString));
+  document.getElementById("randomPlot").style.display = "block";
   document.getElementById("random").style.display = "none";
 }
 else {
@@ -43,7 +46,8 @@ else {
 };
 
 if (twoafc == "true") {
-  document.getElementById("twoafcPlot").setAttribute("src", url2.concat(twoafcString)); 
+  //document.getElementById("twoafcPlot").setAttribute("src", url2.concat(twoafcString)); 
+  document.getElementById("twoafcPlot").style.display = "block";
   document.getElementById("twoafc").style.display = "none";
 }
 else {
@@ -56,9 +60,9 @@ if (bald == "true" && random == "true" && twoafc == "true") {
   } else {
     // Do nothing!
     //console.log('Plot not saved');
-    //setTimeout(function() { redirect('/'); }, 300);
+    setTimeout(function() { redirect('/'); }, 300);
   };
-  setTimeout(function() { redirect('/'); }, 8000);
+  setTimeout(function() { redirect('/'); }, 3000);
 };
 
 function redirect (url) {
