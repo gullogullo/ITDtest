@@ -282,8 +282,6 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 @app.route('/', methods =["POST", "GET"])
 def index():
-    gc.collect()
-    print(gc.garbage)
     #name = ""
     #surname = ""
     #session['firstname'] = name
@@ -302,8 +300,6 @@ def index():
     session['done_2afc'] = False
     session['done_Rand'] = False
     if request.method == "POST":
-        gc.collect()
-        print(gc.garbage)
         name = str(request.values.get('name'))
         surname = str(request.values.get('lastname'))
         session['firstname'] = name
@@ -314,14 +310,10 @@ def index():
     silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
-    gc.collect()
-    print(gc.garbage)
     return render_template("index.html")
 
 @app.route('/test_select')
 def test_select():
-    gc.collect()
-    print(gc.garbage)
     global queried_samples_Bald
     #global test_scores_Bald
     global labels_Bald
@@ -383,14 +375,11 @@ def test_select():
             for d in data:
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
-    gc.collect()
-    print(gc.garbage)
     return render_template('test_select.html', threshold_Bald=threshold_Bald, threshold_Rand=threshold_Rand, threshold_2afc=threshold_2afc)
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
-    print(gc.garbage)
     answer = 0
     trials = 0
     wavfile = None
@@ -410,14 +399,10 @@ def test_bald():
     global model_Bald
     global likelihood_Bald
     if request.method == "POST":
-        print(gc.garbage)
-        gc.collect()
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
         if request.values.getlist('poolData_Bald'):
-            print(gc.garbage)
-            gc.collect()
             # RECEIVE AND BUILD TRAIN DATA
             X_traind = torch.Tensor(list(map(float, request.values.getlist('X_train_Bald'))))
             y_traind = torch.Tensor(list(map(float, request.values.getlist('y_train_Bald'))))
@@ -431,16 +416,10 @@ def test_bald():
         acquirer = BALD(pool.numel())
         best_sample = acquirer.select_samples(model_Bald, likelihood_Bald, pool)
         if answer == 0:
-            print(gc.garbage)
-            gc.collect()
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
             print('ITD queried', best_sample.item())
-            print(gc.garbage)
-            gc.collect()
         else:
-            print(gc.garbage)
-            gc.collect()
             rightmost = int(request.values.get('rightmost'))
             if answer == rightmost:
                 label = torch.Tensor([1])
@@ -491,8 +470,6 @@ def test_bald():
             plt.savefig('static/figures/PF_' + f'{acquirer.__class__.__name__}' + '_Approximation_' + str(trials) + '.png')
             plt.close(f)
             '''
-            print(gc.garbage)
-            gc.collect()
         if trials == al_counter:
             # Plot the PF curve
             '''
@@ -536,13 +513,11 @@ def test_bald():
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,
             'queries': queried, 'labels': labels}
-    gc.collect()
     return render_template('test_bald.html')
 
 
 @app.route('/test_random', methods =["POST", "GET"])
 def test_random():
-    gc.collect()
     trials = 0
     answer = 0
     wavfile = None
@@ -565,7 +540,6 @@ def test_random():
     global model_Random
     global likelihood_Random
     if request.method == "POST":
-        gc.collect()
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
@@ -690,7 +664,6 @@ def test_random():
 
 @app.route('/test_2afc', methods =["POST", "GET"])
 def test_2afc():
-    gc.collect()
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
     if name == 'None':
@@ -715,7 +688,6 @@ def test_2afc():
     reversals = twoafc.reversals
     downup_reversals = twoafc.downup_reversals
     if request.method == "POST":
-        gc.collect()
         # while twoafc.reversals < twoafc.total_reversals:
         # play the stimulus
         answer = int(request.values.get('answer'))
