@@ -268,10 +268,16 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 @app.route('/', methods =["POST", "GET"])
 def index():
-    name = ""
-    surname = ""
-    session['firstname'] = name
-    session['surname'] = surname
+    #name = ""
+    #surname = ""
+    #session['firstname'] = name
+    #session['surname'] = surname
+    name = session.get('firstname', None)
+    if name:
+        name = str(name)
+    surname = session.get('surname', None)
+    if surname:
+        surname = str(surname)
     session['done_Bald'] = False
     session['done_2afc'] = False
     session['done_Rand'] = False

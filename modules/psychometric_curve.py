@@ -5,9 +5,15 @@ import numpy as np
 from scipy import optimize
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from fit_psyche.models.wh2001 import wh2001
-from fit_psyche.models.logit import logit
+# from fit_psyche.models.wh2001 import wh2001
+# from fit_psyche.models.logit import logit
+from scipy import special
 
+def wh2001(x: np.array, mean: float, var: float, guess_rate: float, lapse_rate: float) -> np.ndarray:
+    return guess_rate + (1.0 - guess_rate - lapse_rate) * 0.5 * \
+           (1.0 + special.erf((x - mean) / np.sqrt(2.0 * var ** 2.0)))
+def logit(x: np.array, mean: float, var: float) -> np.ndarray:
+    return 1 / (1 + np.exp(-var * (x - mean)))
 
 class PsychometricCurve(BaseEstimator, RegressorMixin):
     model: str
