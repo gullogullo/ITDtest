@@ -15,6 +15,7 @@ from gpytorch.mlls import VariationalELBO
 # from matplotlib import pyplot as plt
 import numpy as np
 import secrets
+import gc
 # import time
 import os
 import errno
@@ -36,6 +37,7 @@ secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
 torch.set_flush_denormal(True)
+gc.set_debug(gc.DEBUG_LEAK)
 
 # plt.switch_backend('Agg')
 
