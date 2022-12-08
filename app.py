@@ -784,4 +784,5 @@ def test_2afc():
 if __name__== '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
     #Session(app)
+    print('APP IS MAIN!')
     app.run(debug=True)

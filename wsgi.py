@@ -1,4 +1,5 @@
 from app import app
-print('MIAO WSGI')
+
 if __name__ == '__main__':
+    print('WSGI IS MAIN!')
     app.run(debug=False)
