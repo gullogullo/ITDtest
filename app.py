@@ -37,8 +37,7 @@ secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
 torch.set_flush_denormal(True)
-#gc.set_debug(gc.DEBUG_LEAK)
-gc.enable()
+gc.set_debug(gc.DEBUG_LEAK)
 
 # plt.switch_backend('Agg')
 
@@ -112,12 +111,13 @@ def test(model, likelihood, test_data, criterion):
     # lenghtTest = test_data.inputs.numel()
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         observed_pred = likelihood(model(test_data.inputs))
-        pred_labels = observed_pred.mean.ge(0.5).float()
-        score = criterion(pred_labels, test_data.labels)
+        #pred_labels = observed_pred.mean.ge(0.5).float()
+        #score = criterion(pred_labels, test_data.labels)
         # print('RMSE SCORE: ', score)
     # endTest = time.time()
     # print('TEST TIME', endTest - startTest)
-    return score.item(), observed_pred
+    #return score.item(), observed_pred
+    return observed_pred
 
 # SAVE AND LOAD INITIAL MODELS
 
@@ -198,10 +198,10 @@ y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
 poolData_Bald = X_pool
 # poolData_Random = X_pool
 
-test_scores_Bald = []
+#test_scores_Bald = []
 queried_samples_Bald = []
 labels_Bald = []
-test_scores_Random = []
+#test_scores_Random = []
 queried_samples_Random = []
 labels_Random = []
 
@@ -248,10 +248,10 @@ train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bal
 #train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
 train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Random)
-score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, 
+pred_prob_Bald = test(model_Bald, likelihood_Bald, 
     test_data=testData_Bald, criterion=RMSELoss)
 # score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
-score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
+pred_prob_Random = test(model_Random, likelihood_Random, 
     test_data=testData_Bald, criterion=RMSELoss)
 del optimizer_init_Bald
 del mll_init_Bald
@@ -271,13 +271,9 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 '''
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-print('COLLECT PORCO DIO')
-gc.collect()
 
 @app.route('/', methods =["POST", "GET"])
 def index():
-    print('COLLECT PORCO DIO')
-    gc.collect()
     #name = ""
     #surname = ""
     #session['firstname'] = name
@@ -306,25 +302,21 @@ def index():
     silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
-    print('COLLECT PORCO DIO')
-    gc.collect()
     return render_template("index.html")
 
 @app.route('/test_select')
 def test_select():
-    print('COLLECT PORCO DIO')
-    gc.collect()
     global queried_samples_Bald
-    global test_scores_Bald
+    #global test_scores_Bald
     global labels_Bald
     queried_samples_Bald = []
-    test_scores_Bald = []
+    #test_scores_Bald = []
     labels_Bald = []
     global queried_samples_Random
-    global test_scores_Random
+    #global test_scores_Random
     global labels_Random
     queried_samples_Random = []
-    test_scores_Random = []
+    #test_scores_Random = []
     labels_Random = []
     global testData_Bald
     # TODO CHECK IF/WHEN LOAD INIT MODELS
@@ -375,15 +367,11 @@ def test_select():
             for d in data:
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
-    print('COLLECT PORCO DIO')
-    gc.collect()
     return render_template('test_select.html', threshold_Bald=threshold_Bald, threshold_Rand=threshold_Rand, threshold_2afc=threshold_2afc)
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
-    print('COLLECT PORCO DIO')
-    gc.collect()
     answer = 0
     trials = 0
     wavfile = None
@@ -397,7 +385,7 @@ def test_bald():
     pool = poolData_Bald
     queried = queried_samples_Bald
     labels = labels_Bald
-    scores = test_scores_Bald
+    #scores = test_scores_Bald
     traind = trainData_Bald
     train_data_new = trainData_Bald
     global model_Bald
@@ -414,7 +402,7 @@ def test_bald():
             # RECEIVE POOL ITDS
             pool = torch.Tensor(list(map(float, request.values.getlist('poolData_Bald'))))
             # RECEIVE LIST OF SCORES, ITDS AND LABELS
-            scores = list(map(float, request.values.getlist('test_scores_Bald')))
+            #scores = list(map(float, request.values.getlist('test_scores_Bald')))
             queried = list(map(float, request.values.getlist('queried_samples_Bald')))
             labels = list(map(float, request.values.getlist('labels_Bald')))
         acquirer = BALD(pool.numel())
@@ -444,12 +432,10 @@ def test_bald():
                 training_iterations=training_iterations, train_data=train_data_new, mll=mll_Bald)
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
-            score, pred_prob = test(model=model_Bald, likelihood=likelihood_Bald,
+            pred_prob = test(model=model_Bald, likelihood=likelihood_Bald,
                 test_data=testData_Bald, criterion=RMSELoss)
-            scores.append(score)
+            #scores.append(score)
             #print('score', score)
-            print('COLLECT PORCO DIO')
-            gc.collect()
             '''
             max_var, ind = torch.max(pred_prob.variance, 0)
             # print('MAX Variance', max_var)
@@ -512,23 +498,19 @@ def test_bald():
             #session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
             session['done_Bald'] = True
-            del model_Bald
-            del likelihood_Bald
-            del optimizer_Bald
-            del mll_Bald
+            del globals()[model_Bald]
+            del globals()[likelihood_Bald]
+            del globals()[optimizer_Bald]
+            del globals()[mll_Bald]
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
-            'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
+            'pooldata': pool.tolist(), 'trials': trials,
             'queries': queried, 'labels': labels}
-    print('COLLECT PORCO DIO')
-    gc.collect()
     return render_template('test_bald.html')
 
 
 @app.route('/test_random', methods =["POST", "GET"])
 def test_random():
-    print('COLLECT PORCO DIO')
-    gc.collect()
     trials = 0
     answer = 0
     wavfile = None
@@ -543,7 +525,7 @@ def test_random():
     pool = poolData_Bald
     queried = queried_samples_Random
     labels = labels_Random
-    scores = test_scores_Random
+    #scores = test_scores_Random
     # traind = trainData_Random
     # train_data_new = trainData_Random
     traind = trainData_Bald
@@ -562,7 +544,7 @@ def test_random():
             # RECEIVE POOL ITDS
             pool = torch.Tensor(list(map(float, request.values.getlist('poolData_Random'))))
             # RECEIVE LIST OF SCORES, ITDS AND LABELS
-            scores = list(map(float, request.values.getlist('test_scores_Random')))
+            #scores = list(map(float, request.values.getlist('test_scores_Random')))
             queried = list(map(float, request.values.getlist('queried_samples_Random')))
             labels = list(map(float, request.values.getlist('labels_Random')))
         acquirer = Random(pool.numel())
@@ -594,11 +576,9 @@ def test_random():
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
             # score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
-            score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
+            _, pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
                 test_data=testData_Bald, criterion=RMSELoss)
-            test_scores_Random.append(score)
-            print('COLLECT PORCO DIO')
-            gc.collect()
+            #test_scores_Random.append(score)
             '''
             max_var, ind = torch.max(pred_prob.variance, 0)
             # print('MAX Variance', max_var)
@@ -664,16 +644,14 @@ def test_random():
             # session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
             session['done_Rand'] = True
-            del model_Random
-            del likelihood_Random
-            del optimizer_Random
-            del mll_Random
+            del globals()[model_Random]
+            del globals()[likelihood_Random]
+            del globals()[optimizer_Random]
+            del globals()[mll_Random]
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
-            'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
+            'pooldata': pool.tolist(), 'trials': trials,
             'queries': queried, 'labels': labels}
-    print('COLLECT PORCO DIO')
-    gc.collect()
     return render_template('test_random.html')
 
 

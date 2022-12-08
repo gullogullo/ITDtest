@@ -4,7 +4,6 @@ var trials = 0;
 var Xtrain = [];
 var ytrain = [];
 var pooldata = [];
-var scores = [];
 var queries = [];
 var labels = [];
 var itd = 0;
@@ -79,7 +78,6 @@ function toggleClass() {
     Xtrain = data.Xtrain;
     ytrain =data.ytrain;
     pooldata = data.pooldata;
-    scores = data.scores;
     queries = data.queries;
     rightmost = data.rightmost;
   });
@@ -105,7 +103,6 @@ function toggleBtn1() {
       'X_train_Random': Xtrain,
       'y_train_Random': ytrain,
       'poolData_Random': pooldata,
-      'test_scores_Random': scores,
       'labels_Random': labels,
       'queried_samples_Random': queries,
     },
@@ -135,7 +132,6 @@ function toggleBtn1() {
       Xtrain = data.Xtrain;
       ytrain =data.ytrain;
       pooldata = data.pooldata;
-      scores = data.scores;
       queries = data.queries;
       labels = data.labels;
       document.getElementById("btn1").classList.toggle("goUp");
@@ -159,7 +155,6 @@ function toggleBtn2() {
       'X_train_Random': Xtrain,
       'y_train_Random': ytrain,
       'poolData_Random': pooldata,
-      'test_scores_Random': scores,
       'labels_Random': labels,
       'queried_samples_Random': queries,
     },
@@ -189,7 +184,6 @@ function toggleBtn2() {
       Xtrain = data.Xtrain;
       ytrain =data.ytrain;
       pooldata = data.pooldata;
-      scores = data.scores;
       queries = data.queries;
       labels = data.labels;
       document.getElementById("btn1").classList.toggle("goUp");
