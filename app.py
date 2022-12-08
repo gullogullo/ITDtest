@@ -37,7 +37,8 @@ secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
 torch.set_flush_denormal(True)
-gc.set_debug(gc.DEBUG_LEAK)
+#gc.set_debug(gc.DEBUG_LEAK)
+gc.enable()
 
 # plt.switch_backend('Agg')
 
@@ -173,10 +174,15 @@ for n, highdelay in enumerate(y_train_2):
     if np.random.uniform(0, 1) <= DELTA:
         y_train_2[n] = 0
 X_train_Bald = torch.cat((X_train_1, X_train_2))
+del X_train_1
+del X_train_2
 # X_train_Random = torch.cat((X_train_1, X_train_2))
 y_train = torch.cat((y_train_1, y_train_2))
+del y_train_1
+del y_train_2
 # init_trainData_Bald = customDataset(X_train_Bald, y_train)
 trainData_Bald = customDataset(X_train_Bald, y_train)
+del y_train
 # init_trainData_Random = customDataset(X_train_Random, y_train)
 # trainData_Random = customDataset(X_train_Random, y_train)
 # trainData_Random = customDataset(X_train_Bald, y_train)
@@ -187,15 +193,15 @@ X_test = torch.linspace(1, 100, 100)
 yTest = PF_test_function(X_test)
 yTestmean = torch.mean(yTest)
 y_test = torch.sign(yTest - yTestmean).add(1).div(2)
+del yTestmean
+del yTest
 testData_Bald = customDataset(X_test, y_test)
+del X_test
+del y_test
 # testData_Random = customDataset(X_test, y_test)
 
 # INITIALIZE POOL DATA
-X_pool = torch.linspace(1, 70, 70) #100, 100)
-yPool = PF_test_function(X_pool)
-yPoolmean = torch.mean(yPool)
-y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
-poolData_Bald = X_pool
+poolData_Bald = torch.linspace(1, 70, 70) #100, 100)
 # poolData_Random = X_pool
 
 #test_scores_Bald = []
@@ -213,6 +219,8 @@ likelihood_Bald = BernoulliLikelihood()
 # model_Random = GPClassificationModel(X_train_Random)
 model_Random = GPClassificationModel(X_train_Bald)
 likelihood_Random = BernoulliLikelihood()
+
+del X_train_Bald
 
 # INITIALIZE ML PARAMETERS
 
@@ -274,6 +282,8 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 
 @app.route('/', methods =["POST", "GET"])
 def index():
+    gc.collect()
+    print(gc.garbage)
     #name = ""
     #surname = ""
     #session['firstname'] = name
@@ -292,6 +302,8 @@ def index():
     session['done_2afc'] = False
     session['done_Rand'] = False
     if request.method == "POST":
+        gc.collect()
+        print(gc.garbage)
         name = str(request.values.get('name'))
         surname = str(request.values.get('lastname'))
         session['firstname'] = name
@@ -302,10 +314,14 @@ def index():
     silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
+    gc.collect()
+    print(gc.garbage)
     return render_template("index.html")
 
 @app.route('/test_select')
 def test_select():
+    gc.collect()
+    print(gc.garbage)
     global queried_samples_Bald
     #global test_scores_Bald
     global labels_Bald
@@ -367,11 +383,14 @@ def test_select():
             for d in data:
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
+    gc.collect()
+    print(gc.garbage)
     return render_template('test_select.html', threshold_Bald=threshold_Bald, threshold_Rand=threshold_Rand, threshold_2afc=threshold_2afc)
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
+    print(gc.garbage)
     answer = 0
     trials = 0
     wavfile = None
@@ -391,10 +410,14 @@ def test_bald():
     global model_Bald
     global likelihood_Bald
     if request.method == "POST":
+        print(gc.garbage)
+        gc.collect()
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
         if request.values.getlist('poolData_Bald'):
+            print(gc.garbage)
+            gc.collect()
             # RECEIVE AND BUILD TRAIN DATA
             X_traind = torch.Tensor(list(map(float, request.values.getlist('X_train_Bald'))))
             y_traind = torch.Tensor(list(map(float, request.values.getlist('y_train_Bald'))))
@@ -408,10 +431,16 @@ def test_bald():
         acquirer = BALD(pool.numel())
         best_sample = acquirer.select_samples(model_Bald, likelihood_Bald, pool)
         if answer == 0:
+            print(gc.garbage)
+            gc.collect()
             queried.append(best_sample.item())
             rightmost, wavfile = stimulus.play(best_sample)
             print('ITD queried', best_sample.item())
+            print(gc.garbage)
+            gc.collect()
         else:
+            print(gc.garbage)
+            gc.collect()
             rightmost = int(request.values.get('rightmost'))
             if answer == rightmost:
                 label = torch.Tensor([1])
@@ -462,7 +491,8 @@ def test_bald():
             plt.savefig('static/figures/PF_' + f'{acquirer.__class__.__name__}' + '_Approximation_' + str(trials) + '.png')
             plt.close(f)
             '''
-
+            print(gc.garbage)
+            gc.collect()
         if trials == al_counter:
             # Plot the PF curve
             '''
@@ -506,11 +536,13 @@ def test_bald():
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,
             'queries': queried, 'labels': labels}
+    gc.collect()
     return render_template('test_bald.html')
 
 
 @app.route('/test_random', methods =["POST", "GET"])
 def test_random():
+    gc.collect()
     trials = 0
     answer = 0
     wavfile = None
@@ -533,6 +565,7 @@ def test_random():
     global model_Random
     global likelihood_Random
     if request.method == "POST":
+        gc.collect()
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
         trials = int(request.values.get('trials'))
@@ -657,6 +690,7 @@ def test_random():
 
 @app.route('/test_2afc', methods =["POST", "GET"])
 def test_2afc():
+    gc.collect()
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
     if name == 'None':
@@ -681,6 +715,7 @@ def test_2afc():
     reversals = twoafc.reversals
     downup_reversals = twoafc.downup_reversals
     if request.method == "POST":
+        gc.collect()
         # while twoafc.reversals < twoafc.total_reversals:
         # play the stimulus
         answer = int(request.values.get('answer'))
@@ -778,4 +813,3 @@ if __name__== '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
     #Session(app)
     app.run(debug=True)
-
