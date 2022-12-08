@@ -312,27 +312,9 @@ def test_select():
     queried_samples_Random = []
     test_scores_Random = []
     labels_Random = []
-    name = str(session.get('firstname', None))
-    surname = str(session.get('surname', None))
-    queried_Bald = session.get('queried_Bald', None)
-    labels_Baldd = session.get('labels_Bald', None)
-    test_data_Bald = session.get('test_data_Bald', None)
-    pred_Bald = session.get('pred_Bald', None)
-    queried_Rand = session.get('queried_Rand', None)
-    labels_Rand = session.get('labels_Rand', None)
-    test_data_Rand = session.get('test_data_Rand', None)
-    pred_Rand = session.get('pred_Rand', None)
-    queried_2afc = session.get('queried_2afc', None)
-    labels_2afc = session.get('labels_2afc', None)
-    test_data_2afc = session.get('test_data_2afc', None)
-    pred_2afc = session.get('pred_2afc', None)
-    afc_dict = {'type': '2I-2AFC', 'itds': queried_2afc, 'labels': labels_2afc, 'test': test_data_2afc, 'pred': pred_2afc}
-    bald_dict = {'type': 'AL-BALD', 'itds': queried_Bald, 'labels': labels_Baldd, 'test': test_data_Bald, 'pred': pred_Bald} 
-    rand_dict = {'type': 'AL-RANDOM', 'itds': queried_Rand, 'labels': labels_Rand, 'test': test_data_Rand, 'pred': pred_Rand}
+    global testData_Bald
     # TODO CHECK IF/WHEN LOAD INIT MODELS
     # loadInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-    data = [afc_dict, bald_dict, rand_dict]
-    csvString = ['2afc', 'bald', 'random']
     done_Bald = session.get('done_Bald', None)
     done_Rand = session.get('done_Rand', None)
     done_2afc = session.get('done_2afc', None)
@@ -354,6 +336,25 @@ def test_select():
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
         '''
+        name = str(session.get('firstname', None))
+        surname = str(session.get('surname', None))
+        queried_Bald = session.get('queried_Bald', None)
+        labels_Baldd = session.get('labels_Bald', None)
+        #test_data_Bald = session.get('test_data_Bald', None)
+        pred_Bald = session.get('pred_Bald', None)
+        queried_Rand = session.get('queried_Rand', None)
+        labels_Rand = session.get('labels_Rand', None)
+        #test_data_Rand = session.get('test_data_Rand', None)
+        pred_Rand = session.get('pred_Rand', None)
+        queried_2afc = session.get('queried_2afc', None)
+        labels_2afc = session.get('labels_2afc', None)
+        #test_data_2afc = session.get('test_data_2afc', None)
+        pred_2afc = session.get('pred_2afc', None)
+        test_csv = testData_Bald.inputs.tolist()
+        afc_dict = {'type': '2I-2AFC', 'itds': queried_2afc, 'labels': labels_2afc, 'test': test_csv, 'pred': pred_2afc}
+        bald_dict = {'type': 'AL-BALD', 'itds': queried_Bald, 'labels': labels_Baldd, 'test': test_csv, 'pred': pred_Bald} 
+        rand_dict = {'type': 'AL-RANDOM', 'itds': queried_Rand, 'labels': labels_Rand, 'test': test_csv, 'pred': pred_Rand}
+        data = [afc_dict, bald_dict, rand_dict]
         csvname = 'static/csvs/' + name + '_' + surname + '_results.csv'
         with open(csvname, 'w') as output_file:
             dict_writer = csv.writer(output_file)
@@ -489,7 +490,7 @@ def test_bald():
             session['threshold_Bald'] = seventies[0].item()
             session['queried_Bald'] = queried
             session['labels_Bald'] = labels
-            session['test_data_Bald'] = testData_Bald.inputs.tolist()
+            #session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
             session['done_Bald'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
@@ -632,7 +633,7 @@ def test_random():
             session['threshold_Rand'] = seventies[0].item()
             session['queried_Rand'] = queried
             session['labels_Rand'] = labels
-            session['test_data_Rand'] = testData_Bald.inputs.tolist()
+            # session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
             session['done_Rand'] = True
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
@@ -751,7 +752,7 @@ def test_2afc():
             session['threshold_2afc'] = unique_itds[seventy_index].item()
             session['queried_2afc'] = queried
             session['labels_2afc'] = labels
-            session['test_data_2afc'] = testData_Bald.inputs.tolist()
+            # session['test_data_2afc'] = testData_Bald.inputs.tolist()
             session['pred_2afc'] = pc.predict(testData_Bald.inputs.numpy()).tolist()
             session['done_2afc'] = True
         return {'wav_location': wavfile, 'itd': itd, 'factor': factor,
