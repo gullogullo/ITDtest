@@ -37,7 +37,8 @@ secret = secrets.token_urlsafe(32)
 app = Flask(__name__)
 app.secret_key = secret
 torch.set_flush_denormal(True)
-gc.set_debug(gc.DEBUG_LEAK)
+#gc.set_debug(gc.DEBUG_LEAK)
+gc.enable()
 
 # plt.switch_backend('Agg')
 
@@ -252,6 +253,10 @@ score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald,
 # score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
 score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
     test_data=testData_Bald, criterion=RMSELoss)
+del optimizer_init_Bald
+del mll_init_Bald
+del optimizer_init_Random
+del mll_init_Random
 
 '''
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
@@ -266,10 +271,13 @@ PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 '''
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
-
+print('COLLECT PORCO DIO')
+gc.collect()
 
 @app.route('/', methods =["POST", "GET"])
 def index():
+    print('COLLECT PORCO DIO')
+    gc.collect()
     #name = ""
     #surname = ""
     #session['firstname'] = name
@@ -298,10 +306,14 @@ def index():
     silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
+    print('COLLECT PORCO DIO')
+    gc.collect()
     return render_template("index.html")
 
 @app.route('/test_select')
 def test_select():
+    print('COLLECT PORCO DIO')
+    gc.collect()
     global queried_samples_Bald
     global test_scores_Bald
     global labels_Bald
@@ -363,11 +375,15 @@ def test_select():
             for d in data:
                 for key, value in d.items():
                     dict_writer.writerow([key, value])
+    print('COLLECT PORCO DIO')
+    gc.collect()
     return render_template('test_select.html', threshold_Bald=threshold_Bald, threshold_Rand=threshold_Rand, threshold_2afc=threshold_2afc)
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
 def test_bald():
+    print('COLLECT PORCO DIO')
+    gc.collect()
     answer = 0
     trials = 0
     wavfile = None
@@ -432,7 +448,8 @@ def test_bald():
                 test_data=testData_Bald, criterion=RMSELoss)
             scores.append(score)
             #print('score', score)
-
+            print('COLLECT PORCO DIO')
+            gc.collect()
             '''
             max_var, ind = torch.max(pred_prob.variance, 0)
             # print('MAX Variance', max_var)
@@ -495,15 +512,23 @@ def test_bald():
             #session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
             session['done_Bald'] = True
+            del model_Bald
+            del likelihood_Bald
+            del optimizer_Bald
+            del mll_Bald
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
+    print('COLLECT PORCO DIO')
+    gc.collect()
     return render_template('test_bald.html')
 
 
 @app.route('/test_random', methods =["POST", "GET"])
 def test_random():
+    print('COLLECT PORCO DIO')
+    gc.collect()
     trials = 0
     answer = 0
     wavfile = None
@@ -572,7 +597,8 @@ def test_random():
             score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
                 test_data=testData_Bald, criterion=RMSELoss)
             test_scores_Random.append(score)
-
+            print('COLLECT PORCO DIO')
+            gc.collect()
             '''
             max_var, ind = torch.max(pred_prob.variance, 0)
             # print('MAX Variance', max_var)
@@ -638,10 +664,16 @@ def test_random():
             # session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
             session['done_Rand'] = True
+            del model_Random
+            del likelihood_Random
+            del optimizer_Random
+            del mll_Random
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'scores': scores, 'trials': trials,
             'queries': queried, 'labels': labels}
+    print('COLLECT PORCO DIO')
+    gc.collect()
     return render_template('test_random.html')
 
 
