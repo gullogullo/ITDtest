@@ -1,5 +1,5 @@
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy.io import wavfile
 #import time
 #import os
@@ -152,7 +152,7 @@ class Stimulus:
         # RETURN THE RIGHTMOST STIMULUS
         return rightmost, wav
 
-    
+    '''
     def plot_specgram(self, title="Spectrogram"):
         waveform = np.transpose(self.audio_out)
         num_channels, _ = waveform.shape
@@ -166,3 +166,4 @@ class Stimulus:
                 axes[c].set_ylabel(f"Channel {c+1}")
         figure.suptitle(title)
         #plt.show(block=False)
+    '''
