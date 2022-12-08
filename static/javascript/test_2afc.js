@@ -1,4 +1,4 @@
-const totalReversals = 6; //6;
+const totalReversals = 1; //6;
 
 var itd = 0;
 var factor = 0;

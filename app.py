@@ -174,15 +174,15 @@ for n, highdelay in enumerate(y_train_2):
     if np.random.uniform(0, 1) <= DELTA:
         y_train_2[n] = 0
 X_train_Bald = torch.cat((X_train_1, X_train_2))
-del X_train_1
-del X_train_2
+#del X_train_1
+#del X_train_2
 # X_train_Random = torch.cat((X_train_1, X_train_2))
 y_train = torch.cat((y_train_1, y_train_2))
-del y_train_1
-del y_train_2
+#del y_train_1
+#del y_train_2
 # init_trainData_Bald = customDataset(X_train_Bald, y_train)
 trainData_Bald = customDataset(X_train_Bald, y_train)
-del y_train
+#del y_train
 # init_trainData_Random = customDataset(X_train_Random, y_train)
 # trainData_Random = customDataset(X_train_Random, y_train)
 # trainData_Random = customDataset(X_train_Bald, y_train)
@@ -193,11 +193,11 @@ X_test = torch.linspace(1, 100, 100)
 yTest = PF_test_function(X_test)
 yTestmean = torch.mean(yTest)
 y_test = torch.sign(yTest - yTestmean).add(1).div(2)
-del yTestmean
-del yTest
+#del yTestmean
+#del yTest
 testData_Bald = customDataset(X_test, y_test)
-del X_test
-del y_test
+#del X_test
+#del y_test
 # testData_Random = customDataset(X_test, y_test)
 
 # INITIALIZE POOL DATA
@@ -220,7 +220,7 @@ likelihood_Bald = BernoulliLikelihood()
 model_Random = GPClassificationModel(X_train_Bald)
 likelihood_Random = BernoulliLikelihood()
 
-del X_train_Bald
+#del X_train_Bald
 
 # INITIALIZE ML PARAMETERS
 
@@ -246,8 +246,8 @@ twoafc = twoafc()
 stimulus = stimulus()
 
 # INITIALIZE TOTAL COUNTERS
-al_counter = 20 # 20, 25, 40
-twoafc_counter = 6 #6
+al_counter = 1 # 20, 25, 40
+twoafc_counter = 1 #6
 
 # INITIAL TRAINING
 
@@ -261,10 +261,10 @@ pred_prob_Bald = test(model_Bald, likelihood_Bald,
 # score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
 pred_prob_Random = test(model_Random, likelihood_Random, 
     test_data=testData_Bald, criterion=RMSELoss)
-del optimizer_init_Bald
-del mll_init_Bald
-del optimizer_init_Random
-del mll_init_Random
+#del optimizer_init_Bald
+#del mll_init_Bald
+#del optimizer_init_Random
+#del mll_init_Random
 
 '''
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
@@ -379,7 +379,9 @@ def test_select():
 
 
 @app.route('/test_bald', methods =["POST", "GET"])
-def test_bald():
+def test_bald(model_Bald=model_Bald, likelihood_Bald=likelihood_Bald, 
+    pool=poolData_Bald, queried=queried_samples_Bald, labels=labels_Bald,
+    traind=trainData_Bald, train_data_new=trainData_Bald):
     answer = 0
     trials = 0
     wavfile = None
@@ -390,14 +392,12 @@ def test_bald():
         name = ''
     if surname == 'None':
         surname = ''
-    pool = poolData_Bald
-    queried = queried_samples_Bald
-    labels = labels_Bald
+    #pool = poolData_Bald
+    #queried = queried_samples_Bald
+    #labels = labels_Bald
     #scores = test_scores_Bald
-    traind = trainData_Bald
-    train_data_new = trainData_Bald
-    global model_Bald
-    global likelihood_Bald
+    #traind = trainData_Bald
+    #train_data_new = trainData_Bald
     if request.method == "POST":
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
@@ -505,10 +505,10 @@ def test_bald():
             #session['test_data_Bald'] = testData_Bald.inputs.tolist()
             session['pred_Bald'] = pred_prob.mean.tolist()
             session['done_Bald'] = True
-            del model_Bald
-            del likelihood_Bald
-            del optimizer_Bald
-            del mll_Bald
+            #del model_Bald
+            #del likelihood_Bald
+            #del optimizer_Bald
+            #del mll_Bald
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,
@@ -517,7 +517,9 @@ def test_bald():
 
 
 @app.route('/test_random', methods =["POST", "GET"])
-def test_random():
+def test_random(model_Random=model_Random, likelihood_Random=likelihood_Random, 
+    pool=poolData_Bald, queried=queried_samples_Random, labels=labels_Random,
+    traind=trainData_Bald, train_data_new=trainData_Bald):
     trials = 0
     answer = 0
     wavfile = None
@@ -529,16 +531,14 @@ def test_random():
     if surname == 'None':
         surname = ''
     # pool = poolData_Random
-    pool = poolData_Bald
-    queried = queried_samples_Random
-    labels = labels_Random
+    #pool = poolData_Bald
+    #queried = queried_samples_Random
+    #labels = labels_Random
     #scores = test_scores_Random
     # traind = trainData_Random
     # train_data_new = trainData_Random
-    traind = trainData_Bald
-    train_data_new = trainData_Bald
-    global model_Random
-    global likelihood_Random
+    #traind = trainData_Bald
+    #train_data_new = trainData_Bald
     if request.method == "POST":
         # RECEIVE PLAY AND ANSWER
         answer = int(request.values.get('answer'))
@@ -651,10 +651,10 @@ def test_random():
             # session['test_data_Rand'] = testData_Bald.inputs.tolist()
             session['pred_Rand'] = pred_prob.mean.tolist()
             session['done_Rand'] = True
-            del model_Random
-            del likelihood_Random
-            del optimizer_Random
-            del mll_Random
+            #del model_Random
+            #del likelihood_Random
+            #del optimizer_Random
+            #del mll_Random
         return {'wav_location': wavfile, 'itd': best_sample.item(), 'rightmost': rightmost,
             'Xtrain': train_data_new.inputs.tolist(), 'ytrain': train_data_new.labels.tolist(), 
             'pooldata': pool.tolist(), 'trials': trials,

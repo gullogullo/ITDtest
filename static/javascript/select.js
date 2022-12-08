@@ -55,14 +55,17 @@ else {
 };
 
 if (bald == "true" && random == "true" && twoafc == "true") {
+  document.getElementById("twoafc").style.display = "none";
+  document.getElementById("random").style.display = "none";
+  document.getElementById("bald").style.display = "none";
   if (confirm('Do you want to save the results?')) {
     var interval = setInterval(download, 300, urlsCsv);
   } else {
     // Do nothing!
     //console.log('Plot not saved');
-    setTimeout(function() { redirect('/'); }, 300);
+    setTimeout(function() { redirect('/'); }, 3000);
   };
-  setTimeout(function() { redirect('/'); }, 3000);
+  setTimeout(function() { redirect('/'); }, 8000);
 };
 
 function redirect (url) {
