@@ -15,7 +15,7 @@ from gpytorch.mlls import VariationalELBO
 from matplotlib import pyplot as plt
 import numpy as np
 import secrets
-import time
+# import time
 import os
 import errno
 import sys
@@ -53,7 +53,7 @@ def silentremove(filename):
 
 ALPHA = 25 # threshold
 BETA = 10 # slope
-GAMMA = 0.5 # guess rate
+# GAMMA = 0.5 # guess rate
 DELTA = 0.01 #lapse rate
 
 def PF_test_function(x):
@@ -84,7 +84,7 @@ class GPClassificationModel(ApproximateGP):
 # TRAIN AND TEST METHODS
 
 def train(model, likelihood, optimizer, training_iterations, train_data, mll):
-    startTrain = time.time()
+    # startTrain = time.time()
     model.train()
     likelihood.train()
     trainX = train_data.inputs
@@ -96,7 +96,7 @@ def train(model, likelihood, optimizer, training_iterations, train_data, mll):
         loss.backward()
         # print('Iter %d/%d - Loss: %.3f' % (i + 1, training_iterations, loss.item()))
         optimizer.step()
-    endTrain = time.time()
+    # endTrain = time.time()
     #print('TRAIN TIME', endTrain - startTrain)
 
 def test(model, likelihood, test_data, criterion):
@@ -117,31 +117,34 @@ def test(model, likelihood, test_data, criterion):
 
 # SAVE AND LOAD INITIAL MODELS
 
-def saveInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
-    global pre_acquisition_model_state_Bald
-    global pre_acquisition_ll_state_Bald
-    global pre_acquisition_model_state_Random
-    global pre_acquisition_ll_state_Random
-    torch.save(pre_acquisition_model_state_Bald, pathBald)
-    torch.save(pre_acquisition_ll_state_Bald, pathllBald)
-    torch.save(pre_acquisition_model_state_Random, pathRandom)
-    torch.save(pre_acquisition_ll_state_Random, pathllRandom)
+def saveInitModels(model_Bald, likelihood_Bald, model_Random, likelihood_Random):
+    PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
+    PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
+    PATH_Random = 'static/model/init_state_dict_model_random.pt'
+    PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
+    pre_acquisition_model_state_Bald = model_Bald.state_dict()
+    pre_acquisition_model_state_Random = model_Random.state_dict()
+    pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
+    pre_acquisition_ll_state_Random = likelihood_Random.state_dict()
+    torch.save(pre_acquisition_model_state_Bald, PATH_Bald)
+    torch.save(pre_acquisition_ll_state_Bald, PATH_ll_Bald)
+    torch.save(pre_acquisition_model_state_Random, PATH_Random)
+    torch.save(pre_acquisition_ll_state_Random, PATH_ll_Random)
 
-def loadInitModels(pathBald, pathllBald, pathRandom, pathllRandom):
-    global model_Bald
-    global X_train_Bald
-    global likelihood_Bald
-    global model_Random
-    global X_train_Random
-    global likelihood_Random
+def loadInitModels(model_Bald, X_train_Bald, likelihood_Bald, model_Random, likelihood_Random):
+    PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
+    PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
+    PATH_Random = 'static/model/init_state_dict_model_random.pt'
+    PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
     model_Bald = GPClassificationModel(X_train_Bald)
-    model_Bald.load_state_dict(torch.load(pathBald))
+    model_Bald.load_state_dict(torch.load(PATH_Bald))
     likelihood_Bald = BernoulliLikelihood()
-    likelihood_Bald.load_state_dict(torch.load(pathllBald))
-    model_Random = GPClassificationModel(X_train_Random)
-    model_Random.load_state_dict(torch.load(pathRandom))
+    likelihood_Bald.load_state_dict(torch.load(PATH_ll_Bald))
+    # model_Random = GPClassificationModel(X_train_Random)
+    model_Random = GPClassificationModel(X_train_Bald)
+    model_Random.load_state_dict(torch.load(PATH_Random))
     likelihood_Random = BernoulliLikelihood()
-    likelihood_Random.load_state_dict(torch.load(pathllRandom))
+    likelihood_Random.load_state_dict(torch.load(PATH_ll_Random))
 
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
@@ -166,12 +169,13 @@ for n, highdelay in enumerate(y_train_2):
     if np.random.uniform(0, 1) <= DELTA:
         y_train_2[n] = 0
 X_train_Bald = torch.cat((X_train_1, X_train_2))
-X_train_Random = torch.cat((X_train_1, X_train_2))
+# X_train_Random = torch.cat((X_train_1, X_train_2))
 y_train = torch.cat((y_train_1, y_train_2))
-init_trainData_Bald = customDataset(X_train_Bald, y_train)
+# init_trainData_Bald = customDataset(X_train_Bald, y_train)
 trainData_Bald = customDataset(X_train_Bald, y_train)
-init_trainData_Random = customDataset(X_train_Random, y_train)
-trainData_Random = customDataset(X_train_Random, y_train)
+# init_trainData_Random = customDataset(X_train_Random, y_train)
+# trainData_Random = customDataset(X_train_Random, y_train)
+# trainData_Random = customDataset(X_train_Bald, y_train)
 
 # TODO INITIALIZE TEST DATA: ADD GUESS AND LAPSE RATE
 
@@ -180,7 +184,7 @@ yTest = PF_test_function(X_test)
 yTestmean = torch.mean(yTest)
 y_test = torch.sign(yTest - yTestmean).add(1).div(2)
 testData_Bald = customDataset(X_test, y_test)
-testData_Random = customDataset(X_test, y_test)
+# testData_Random = customDataset(X_test, y_test)
 
 # INITIALIZE POOL DATA
 X_pool = torch.linspace(1, 70, 70) #100, 100)
@@ -188,7 +192,7 @@ yPool = PF_test_function(X_pool)
 yPoolmean = torch.mean(yPool)
 y_pool = torch.sign(yPool - yPoolmean).add(1).div(2)
 poolData_Bald = X_pool
-poolData_Random = X_pool
+# poolData_Random = X_pool
 
 test_scores_Bald = []
 queried_samples_Bald = []
@@ -202,7 +206,8 @@ labels_Random = []
 model_Bald = GPClassificationModel(X_train_Bald)
 likelihood_Bald = BernoulliLikelihood()
 
-model_Random = GPClassificationModel(X_train_Random)
+# model_Random = GPClassificationModel(X_train_Random)
+model_Random = GPClassificationModel(X_train_Bald)
 likelihood_Random = BernoulliLikelihood()
 
 # INITIALIZE ML PARAMETERS
@@ -216,7 +221,9 @@ optimizer_init_Random = Adam(model_Random.parameters(), lr=lr)
 
 # "Loss" for GPs - the marginal log likelihood
 mll_init_Bald = VariationalELBO(likelihood_Bald, model_Bald, trainData_Bald.labels.numel())
-mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Random.labels.numel())
+# mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Random.labels.numel())
+mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Bald.labels.numel())
+
 
 # INITIALIZE 2I-2AFC
 
@@ -234,13 +241,16 @@ twoafc_counter = 6 #6
 
 train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bald, 
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Bald)
+#train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
 train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
-    training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
+    training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Random)
 score_Bald, pred_prob_Bald = test(model_Bald, likelihood_Bald, 
     test_data=testData_Bald, criterion=RMSELoss)
+# score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
 score_Random, pred_prob_Random = test(model_Random, likelihood_Random, 
-    test_data=testData_Random, criterion=RMSELoss)
+    test_data=testData_Bald, criterion=RMSELoss)
 
+'''
 pre_acquisition_model_state_Bald = model_Bald.state_dict()
 pre_acquisition_model_state_Random = model_Random.state_dict()
 pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
@@ -250,8 +260,10 @@ PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
 PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
 PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
+'''
 
 # saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+
 
 @app.route('/', methods =["POST", "GET"])
 def index():
@@ -286,9 +298,9 @@ def test_select():
     global queried_samples_Random
     global test_scores_Random
     global labels_Random
+    queried_samples_Random = []
     test_scores_Random = []
     labels_Random = []
-    queried_samples_Random = []
     name = str(session.get('firstname', None))
     surname = str(session.get('surname', None))
     queried_Bald = session.get('queried_Bald', None)
@@ -417,7 +429,6 @@ def test_bald():
             plt.close(f)
             '''
 
-
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
@@ -449,7 +460,7 @@ def test_bald():
             #print('labels', labels)
             #print('test_data', testData_Bald.inputs.numpy())
             #print('observed_pred.mean', pred_prob.mean)
-            print('saving image')
+            # print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_BALD_Approximation.png')
             plt.close(f)
             session['done_Bald'] = True
@@ -472,12 +483,15 @@ def test_random():
         name = ''
     if surname == 'None':
         surname = ''
-    pool = poolData_Random
+    # pool = poolData_Random
+    pool = poolData_Bald
     queried = queried_samples_Random
     labels = labels_Random
     scores = test_scores_Random
-    traind = trainData_Random
-    train_data_new = trainData_Random
+    # traind = trainData_Random
+    # train_data_new = trainData_Random
+    traind = trainData_Bald
+    train_data_new = trainData_Bald
     global model_Random
     global likelihood_Random
     if request.method == "POST":
@@ -523,10 +537,10 @@ def test_random():
                 training_iterations=training_iterations, train_data=train_data_new, mll=mll_Random)
             # test the model and compute the score 
             # TODO FIND A STOP CRITERION AND A METRIC FOR SCORE
-            score, pred_prob = test(model=model_Random, likelihood=likelihood_Random,
-                test_data=testData_Random, criterion=RMSELoss)
+            # score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
+            score, pred_prob = test(model=model_Random, likelihood=likelihood_Random, 
+                test_data=testData_Bald, criterion=RMSELoss)
             test_scores_Random.append(score)
-
 
             '''
             max_var, ind = torch.max(pred_prob.variance, 0)
@@ -555,17 +569,16 @@ def test_random():
             plt.close(f)
             '''
             
-
-
         if trials == al_counter:
             # Plot the PF curve
             f, ax = plt.subplots(1, 1)
             ax.tick_params(left = False)
             ax.set_ylim(-0.3, 1.3)
-            ax.scatter(trainData_Random.inputs.reshape(-1, 1).numpy(), trainData_Random.labels.numpy(),  
-                marker='*')
+            # ax.scatter(trainData_Random.inputs.reshape(-1, 1).numpy(), trainData_Random.labels.numpy(), marker='*')
+            ax.scatter(trainData_Bald.inputs.reshape(-1, 1).numpy(), trainData_Bald.labels.numpy(), marker='*')
             ax.scatter(queried, labels,  marker='d', color='b')
-            ax.plot(testData_Random.inputs.numpy(), pred_prob.mean, 'r')
+            # ax.plot(testData_Random.inputs.numpy(), pred_prob.mean, 'r')
+            ax.plot(testData_Bald.inputs.numpy(), pred_prob.mean, 'r')
             double_std = torch.sqrt(pred_prob.variance)
             lower = pred_prob.mean - double_std
             upper = pred_prob.mean + double_std
@@ -573,8 +586,10 @@ def test_random():
             seventynine_percent = min(pred_prob.mean, key= lambda x: abs(x - 0.794))
             seventy_index = (pred_prob.mean == seventynine_percent).nonzero(as_tuple=True)[0]
             # print('79.4% point PF curve: ', testData_Bald.inputs[seventy_index])
-            seventies = testData_Random.inputs[seventy_index]
-            ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), 
+            # seventies = testData_Random.inputs[seventy_index]
+            seventies = testData_Bald.inputs[seventy_index]
+            # ax.fill_between(testData_Random.inputs.numpy(), lower.numpy(), upper.numpy(), alpha=0.5, color='r')
+            ax.fill_between(testData_Bald.inputs.numpy(), lower.numpy(), upper.numpy(), 
                 alpha=0.5, color='r')
             ax.legend(['Train Data', 'Latent PF on test data', 'Predicted probabilities' + '\n' + 'Max variance: {:.2f}'.format(max_var.item()) + '\n' + 'at: {:.0f} '.format(testData_Random.inputs.numpy()[ind]) + r'$\mu$s'])
             ax.set_xlabel('ITD')
@@ -587,7 +602,7 @@ def test_random():
             #print('labels', labels)
             #print('test_data', testData_Random.inputs.numpy())
             #print('observed_pred.mean', pred_prob.mean)
-            print('saving image')
+            # print('saving image')
             plt.savefig('static/figures/' + name + '_' + surname + '_' + 'PF_Random_Approximation.png')
             plt.close(f)
             session['done_Rand'] = True
@@ -711,7 +726,7 @@ def test_2afc():
             #print('labels', labels)
             #print('test_data', testData_Bald.inputs.numpy())
             #print('observed_pred.mean', pc.predict(testData_Bald.inputs.numpy()))
-            print('saving image')
+            # print('saving image')
             pc.plot(itds_sorted, labels_sorted, name, surname, unique_itds[seventy_index].item())
             session['done_2afc'] = True
         return {'wav_location': wavfile, 'itd': itd, 'factor': factor,
