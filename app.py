@@ -275,9 +275,13 @@ def index():
     name = session.get('firstname', None)
     if name:
         name = str(name)
+    else:
+        name = ''
     surname = session.get('surname', None)
     if surname:
         surname = str(surname)
+    else:
+        surname = ''
     session['done_Bald'] = False
     session['done_2afc'] = False
     session['done_Rand'] = False
