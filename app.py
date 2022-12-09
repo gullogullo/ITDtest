@@ -122,34 +122,32 @@ def test(model, likelihood, test_data, criterion):
 
 # SAVE AND LOAD INITIAL MODELS
 
-def saveInitModels(model_Bald, likelihood_Bald, model_Random, likelihood_Random):
-    PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
-    PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
-    PATH_Random = 'static/model/init_state_dict_model_random.pt'
-    PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
-    pre_acquisition_model_state_Bald = model_Bald.state_dict()
-    pre_acquisition_model_state_Random = model_Random.state_dict()
-    pre_acquisition_ll_state_Bald = likelihood_Bald.state_dict()
-    pre_acquisition_ll_state_Random = likelihood_Random.state_dict()
-    torch.save(pre_acquisition_model_state_Bald, PATH_Bald)
-    torch.save(pre_acquisition_ll_state_Bald, PATH_ll_Bald)
-    torch.save(pre_acquisition_model_state_Random, PATH_Random)
-    torch.save(pre_acquisition_ll_state_Random, PATH_ll_Random)
+def saveInitModels(model_Bald, likelihood_Bald):
+    PATH_model = 'static/model/init_state_dict_model.pt'
+    PATH_ll = 'static/model/init_state_dict_ll.pt'
+    pre_acquisition_model_state = model_Bald.state_dict()
+    pre_acquisition_ll_state = likelihood_Bald.state_dict()
+    torch.save(pre_acquisition_model_state, PATH_model)
+    torch.save(pre_acquisition_ll_state, PATH_ll)
 
-def loadInitModels(model_Bald, X_train_Bald, likelihood_Bald, model_Random, likelihood_Random):
-    PATH_Bald = 'static/model/init_state_dict_model_bald.pt'
-    PATH_ll_Bald = 'static/model/init_state_dict_ll_bald.pt'
-    PATH_Random = 'static/model/init_state_dict_model_random.pt'
-    PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
+def loadInitModels():
+    global model_Bald
+    global likelihood_Bald
+    global model_Random
+    global likelihood_Random
+    PATH_model = 'static/model/init_state_dict_model.pt'
+    PATH_ll = 'static/model/init_state_dict_ll.pt'
     model_Bald = GPClassificationModel(X_train_Bald)
-    model_Bald.load_state_dict(torch.load(PATH_Bald))
+    model_Bald.load_state_dict(torch.load(PATH_model))
     likelihood_Bald = BernoulliLikelihood()
-    likelihood_Bald.load_state_dict(torch.load(PATH_ll_Bald))
+    likelihood_Bald.load_state_dict(torch.load(PATH_ll))
     # model_Random = GPClassificationModel(X_train_Random)
     model_Random = GPClassificationModel(X_train_Bald)
-    model_Random.load_state_dict(torch.load(PATH_Random))
+    model_Random.load_state_dict(torch.load(PATH_model))
     likelihood_Random = BernoulliLikelihood()
-    likelihood_Random.load_state_dict(torch.load(PATH_ll_Random))
+    likelihood_Random.load_state_dict(torch.load(PATH_ll))
+    print('LOADED INITIAL MODELS')
+    #return model_Bald, likelihood_Bald, model_Random, likelihood_Random
 
 
 # TODO INITIALIZE TRAINING DATA: ADD GUESS AND LAPSE RATE
@@ -229,12 +227,12 @@ training_iterations = 100 #100
 
 # Use the adam optimizer
 optimizer_init_Bald = Adam(model_Bald.parameters(), lr=lr)
-optimizer_init_Random = Adam(model_Random.parameters(), lr=lr)
+#optimizer_init_Random = Adam(model_Random.parameters(), lr=lr)
 
 # "Loss" for GPs - the marginal log likelihood
 mll_init_Bald = VariationalELBO(likelihood_Bald, model_Bald, trainData_Bald.labels.numel())
 # mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Random.labels.numel())
-mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Bald.labels.numel())
+#mll_init_Random = VariationalELBO(likelihood_Random, model_Random, trainData_Bald.labels.numel())
 
 
 # INITIALIZE 2I-2AFC
@@ -254,13 +252,13 @@ twoafc_counter = 1 #6
 train(model=model_Bald, likelihood=likelihood_Bald, optimizer=optimizer_init_Bald, 
     training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Bald)
 #train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, training_iterations=training_iterations, train_data=trainData_Random, mll=mll_init_Random)
-train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
-    training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Random)
+#train(model=model_Random, likelihood=likelihood_Random, optimizer=optimizer_init_Random, 
+#    training_iterations=training_iterations, train_data=trainData_Bald, mll=mll_init_Random)
 pred_prob_Bald = test(model_Bald, likelihood_Bald, 
     test_data=testData_Bald, criterion=RMSELoss)
 # score_Random, pred_prob_Random = test(model_Random, likelihood_Random, test_data=testData_Random, criterion=RMSELoss)
-pred_prob_Random = test(model_Random, likelihood_Random, 
-    test_data=testData_Bald, criterion=RMSELoss)
+#pred_prob_Random = test(model_Random, likelihood_Random, 
+#    test_data=testData_Bald, criterion=RMSELoss)
 #del optimizer_init_Bald
 #del mll_init_Bald
 #del optimizer_init_Random
@@ -278,7 +276,7 @@ PATH_Random = 'static/model/init_state_dict_model_random.pt'
 PATH_ll_Random = 'static/model/init_state_dict_ll_random.pt'
 '''
 
-# saveInitModels(PATH_Bald, PATH_ll_Bald, PATH_Random, PATH_ll_Random)
+saveInitModels(model_Bald, likelihood_Bald)
 
 @app.route('/', methods =["POST", "GET"])
 def index():
@@ -310,6 +308,7 @@ def index():
     silentremove('static/csvs/' + name + '_' + surname + '_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_bald_results.csv')
     #silentremove('static/csvs/' + name + '_' + surname + '_random_results.csv')
+    loadInitModels()
     return render_template("index.html")
 
 @app.route('/test_select')
