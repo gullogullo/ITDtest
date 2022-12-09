@@ -16,7 +16,7 @@ from gpytorch.mlls import VariationalELBO
 import numpy as np
 import secrets
 import gc
-# import time
+import time
 import os
 import errno
 import sys
@@ -88,7 +88,7 @@ class GPClassificationModel(ApproximateGP):
 # TRAIN AND TEST METHODS
 
 def train(model, likelihood, optimizer, training_iterations, train_data, mll):
-    # startTrain = time.time()
+    startTrain = time.time()
     model.train()
     likelihood.train()
     trainX = train_data.inputs
@@ -100,8 +100,8 @@ def train(model, likelihood, optimizer, training_iterations, train_data, mll):
         loss.backward()
         # print('Iter %d/%d - Loss: %.3f' % (i + 1, training_iterations, loss.item()))
         optimizer.step()
-    # endTrain = time.time()
-    #print('TRAIN TIME', endTrain - startTrain)
+    endTrain = time.time()
+    print('TRAIN TIME', endTrain - startTrain)
 
 def test(model, likelihood, test_data, criterion):
     # startTest = time.time()
